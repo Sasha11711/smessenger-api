@@ -12,7 +12,7 @@ public class ApiDocConfig implements WebMvcConfigurer {
     private Info apiInfo() {
         return new Info().title("SMessenger API")
                 .description("API for examination messenger")
-                .version("0.1.0")
+                .version("0.2.1")
                 .contact(new Contact().name("Oleksandr Marchuk").email("oleksandrmarchuk2006@gmail.com"));
     }
 

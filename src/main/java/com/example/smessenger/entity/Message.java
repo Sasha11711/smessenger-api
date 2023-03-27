@@ -3,7 +3,8 @@ package com.example.smessenger.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.Instant;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +25,7 @@ public class Message {
 
     @ToString.Include
     @Column(nullable = false, updatable = false)
-    private Date sentDate;
+    private Instant sentInstant = Instant.now();
 
     @ToString.Include
     @Column(nullable = false)
@@ -39,5 +40,5 @@ public class Message {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private User author;
+    private Users author;
 }

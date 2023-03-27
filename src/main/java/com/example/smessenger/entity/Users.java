@@ -3,8 +3,9 @@ package com.example.smessenger.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,12 +14,15 @@ import java.util.Set;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-public class User {
+public class Users {
     @Id
     @ToString.Include
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ToString.Include
+    private UUID uuid = UUID.randomUUID();
 
     @ToString.Include
     @Column(nullable = false, unique = true)
@@ -37,7 +41,11 @@ public class User {
 
     @ToString.Include
     @Column(nullable = false, updatable = false)
-    private Date registrationDate;
+    private Instant registrationInstant = Instant.now();
+
+    @ToString.Include
+    @Column(nullable = false)
+    private Boolean isDeactivated = false;
 
     @ManyToMany(mappedBy = "users")
     private Set<Chat> chats;
@@ -48,27 +56,25 @@ public class User {
     @ManyToMany(mappedBy = "bannedUsers")
     private Set<Chat> bannedAt;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "user_friend",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id"))
-    private Set<User> friends;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "user_friend")
+    private Set<Users> friends;
 
     @ManyToMany
     @JoinTable(name = "user_friend_requested",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_requested_id"))
-    private Set<User> friendRequests;
+    private Set<Users> friendRequests;
 
     @ManyToMany(mappedBy = "friendRequests")
-    private Set<User> FriendRequestedBy;
+    private Set<Users> FriendRequestedBy;
 
     @ManyToMany
     @JoinTable(name = "user_blocked",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "blocked_id"))
-    private Set<User> blockedUsers;
+    private Set<Users> blockedUsers;
 
     @ManyToMany(mappedBy = "blockedUsers")
-    private Set<User> blockedBy;
+    private Set<Users> blockedBy;
 }

@@ -3,7 +3,7 @@ package com.example.smessenger.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -29,26 +29,26 @@ public class Chat {
 
     @ToString.Include
     @Column(nullable = false, updatable = false)
-    private Date creationDate;
+    private Instant creationInstant = Instant.now();
 
-    @OneToMany(mappedBy = "chat")
+    @OneToMany(mappedBy = "chat", orphanRemoval = true)
     private Set<Message> messages;
 
     @ManyToMany
     @JoinTable(name = "chat_user",
             joinColumns = @JoinColumn(name = "chat_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> users;
+    private Set<Users> users;
 
     @ManyToMany
     @JoinTable(name = "chat_moderator",
             joinColumns = @JoinColumn(name = "chat_id"),
             inverseJoinColumns = @JoinColumn(name = "moderator_id"))
-    private Set<User> moderators;
+    private Set<Users> moderators;
 
     @ManyToMany
     @JoinTable(name = "chat_banned_user",
             joinColumns = @JoinColumn(name = "chat_id"),
             inverseJoinColumns = @JoinColumn(name = "banned_user_id"))
-    private Set<User> bannedUsers;
+    private Set<Users> bannedUsers;
 }
