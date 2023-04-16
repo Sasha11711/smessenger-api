@@ -56,8 +56,11 @@ public class Users {
     @ManyToMany(mappedBy = "bannedUsers")
     private Set<Chat> bannedAt;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "user_friend")
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "user_friend",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
     private Set<Users> friends;
 
     @ManyToMany

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -112,6 +113,7 @@ public class UserService {
         Users existingAnotherUser = get(userId);
         if (existingAnotherUser.getFriendRequests().remove(existingUser)) {
             existingUser.getFriends().add(existingAnotherUser);
+            existingAnotherUser.getFriends().add(existingUser);
             userRepository.save(existingUser);
             userRepository.save(existingAnotherUser);
         }
@@ -157,12 +159,22 @@ public class UserService {
         Users existingUser = checkUser(id, uuid);
         if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), password))
             throw new BadRequestException("Incorrect login or password");
+
         existingUser.setIsDeactivated(true);
         existingUser.setUsername("deactivated user");
+        existingUser.setAvatar(null);
         existingUser.getChats().clear();
-        existingUser.getFriends().clear();
-        existingUser.getFriendRequests().clear();
         existingUser.getModeratorAt().clear();
+        existingUser.getBlockedUsers().clear();
+        Set<Users> friends = existingUser.getFriends();
+        for (Users friend : friends) {
+            friend.getFriends().remove(existingUser);
+            userRepository.save(friend);
+        }
+        friends.clear();
+        existingUser.getFriendRequests().clear();
+        existingUser.getFriendRequestedBy().clear();
+
         userRepository.save(existingUser);
     }
 
