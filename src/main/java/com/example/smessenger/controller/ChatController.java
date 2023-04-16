@@ -31,9 +31,9 @@ public class ChatController {
         chatService.updateByMod(id, modId, modUuid, chatCreateDto);
     }
 
-    @PutMapping("/{id}/join/{userId}&{userUuid}")
-    public void joinUser(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid) {
-        chatService.joinUser(id, userId, userUuid);
+    @PutMapping("/{id}/join/{userId}/{friendId}&{friendUuid}")
+    public void joinUser(@PathVariable Long id, @PathVariable Long userId, @PathVariable Long friendId, @PathVariable UUID friendUuid) {
+        chatService.joinUser(id, userId, friendId, friendUuid);
     }
 
     @PutMapping("/{id}/leave/{userId}&{userUuid}")

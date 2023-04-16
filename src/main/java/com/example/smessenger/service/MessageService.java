@@ -1,6 +1,5 @@
 package com.example.smessenger.service;
 
-import com.example.smessenger.dto.message.MessageCreateDto;
 import com.example.smessenger.entity.Chat;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
@@ -33,33 +32,30 @@ public class MessageService {
         Chat existingChat = chatService.get(chatId);
         if (!existingChat.getUsers().contains(existingUser))
             throw new ForbiddenException("User is not in the chat");
+        message.setChat(existingChat);
+        message.setAuthor(existingUser);
         messageRepository.save(message);
     }
 
-    public void updateByAuthor(Long id, Long userId, UUID userUuid, MessageCreateDto messageInfoDto) {
+    public void updateByAuthor(Long id, Long userId, UUID userUuid, String newText) {
         Users existingUser = userService.checkUser(userId, userUuid);
         Message existingMessage = get(id);
         if (existingMessage.getAuthor() != existingUser)
             throw new ForbiddenException("User isn't author");
-        existingMessage.setIsEdited(true);
-        existingMessage.setText(messageInfoDto.getText());
-        existingMessage.setEmbedImage(messageInfoDto.getEmbedImage());
-        messageRepository.save(existingMessage);
+        if (newText != null && !newText.equals(existingMessage.getText())) {
+            existingMessage.setIsEdited(true);
+            existingMessage.setText(newText);
+            messageRepository.save(existingMessage);
+        }
     }
 
-    public void deleteByAuthor(Long id, Long userId, UUID userUuid) {
+    public void deleteByAuthorOrMod(Long id, Long userId, UUID userUuid) {
         Users existingUser = userService.checkUser(userId, userUuid);
         Message existingMessage = get(id);
-        if (existingMessage.getAuthor() != existingUser)
-            throw new ForbiddenException("User isn't author");
-        messageRepository.deleteById(id);
-    }
-
-    public void deleteByMod(Long id, Long modId, UUID modUuid) {
-        Users existingMod = userService.checkUser(modId, modUuid);
-        Message existingMessage = get(id);
-        if (!existingMessage.getChat().getModerators().contains(existingMod))
-            throw new ForbiddenException("User isn't mod");
-        messageRepository.deleteById(id);
+        if (existingMessage.getAuthor() == existingUser || existingMessage.getChat().getModerators().contains(existingUser)){
+            messageRepository.deleteById(id);
+        } else {
+            throw new ForbiddenException("User isn't a moderator or an author");
+        }
     }
 }

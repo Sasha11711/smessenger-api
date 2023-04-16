@@ -1,6 +1,6 @@
 package com.example.smessenger.dto.chat;
 
-import com.example.smessenger.dto.message.MessageInfoDto;
+import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.dto.user.UserInfoDto;
 import lombok.Data;
 
@@ -15,7 +15,7 @@ public class ChatDto {
     private Byte[] chatImage;
     private Instant creationInstant;
 
-    private Set<MessageInfoDto> messages;
+    private Set<MessageDto> messages;
     private Set<UserInfoDto> users;
     private Set<UserInfoDto> moderators;
     private Set<UserInfoDto> bannedUsers;

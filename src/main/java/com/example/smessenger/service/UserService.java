@@ -1,16 +1,13 @@
 package com.example.smessenger.service;
 
-import com.example.smessenger.dto.user.UserCreateDto;
+import com.example.smessenger.dto.user.UserUpdateDto;
 import com.example.smessenger.entity.Users;
-import com.example.smessenger.exception.BadRequestException;
-import com.example.smessenger.exception.ForbiddenException;
-import com.example.smessenger.exception.GoneException;
-import com.example.smessenger.exception.NotFoundException;
+import com.example.smessenger.exception.*;
 import com.example.smessenger.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -21,6 +18,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final Pattern loginRegex = Pattern.compile("^[\\w-]{10,}$");
     private final Pattern passwordRegex = Pattern.compile("^(?=.*\\d)[\\w-]{12,}$");
+
+
+    public List<Users> getAllByUsername(String username) {
+        return userRepository.findAllByUsernameStartsWith(username);
+    }
 
     public Users get(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
@@ -44,26 +46,37 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void update(Long id, UUID uuid, UserCreateDto userInfoDto) {
+    public void update(Long id, UUID uuid, UserUpdateDto userUpdateDto) {
         Users existingUser = checkUser(id, uuid);
-        existingUser.setUsername(userInfoDto.getUsername());
-        existingUser.setAvatar(userInfoDto.getAvatar());
-        userRepository.save(existingUser);
+        String newUsername = userUpdateDto.getUsername();
+        Byte[] newAvatar = userUpdateDto.getAvatar();
+        boolean usernameChangeable = newUsername != null && !newUsername.equals(existingUser.getUsername());
+        boolean avatarChangeable = newAvatar != null && newAvatar != existingUser.getAvatar();
+        if (usernameChangeable || avatarChangeable) {
+            if (usernameChangeable) existingUser.setUsername(newUsername);
+            if (avatarChangeable) existingUser.setAvatar(newAvatar);
+            userRepository.save(existingUser);
+        }
     }
 
-    public void changePassword(Long id, UUID uuid, String username, String oldPassword, String newPassword) {
+    public String changePassword(Long id, UUID uuid, String login, String oldPassword, String newPassword) {
         Users existingUser = checkUser(id, uuid);
-        if (!Objects.equals(existingUser.getUsername(), username) || !Objects.equals(existingUser.getPassword(), oldPassword))
+        if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), oldPassword))
             throw new BadRequestException("Incorrect username or password");
         if (!passwordRegex.matcher(newPassword).matches())
             throw new BadRequestException("Invalid password format");
         existingUser.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
+        UUID newUuid = UUID.randomUUID();
+        existingUser.setUuid(newUuid);
         userRepository.save(existingUser);
+        return existingUser.getId() + "&" + newUuid;
     }
 
     public void addFriendRequest(Long id, UUID uuid, Long userId) {
         Users existingUser = checkUser(id, uuid);
         Users existingAnotherUser = checkUser(userId);
+        if (existingUser == existingAnotherUser)
+            throw new ConflictException("Cannot do actions with yourself");
         if (existingUser.getBlockedUsers().contains(existingAnotherUser))
             throw new ForbiddenException("User is blocked");
         if (existingUser.getBlockedBy().contains(existingUser))
@@ -86,29 +99,36 @@ public class UserService {
     public void declineFriendRequest(Long id, UUID uuid, Long userId) {
         Users existingUser = checkUser(id, uuid);
         Users existingAnotherUser = get(userId);
-        if (existingUser.getFriendRequestedBy().remove(existingAnotherUser))
-            userRepository.save(existingUser);
+        if (existingAnotherUser.getFriendRequests().remove(existingUser))
+            userRepository.save(existingAnotherUser);
     }
 
     public void acceptFriendRequest(Long id, UUID uuid, Long userId) {
         Users existingUser = checkUser(id, uuid);
         Users existingAnotherUser = get(userId);
-        if (existingUser.getFriendRequestedBy().remove(existingAnotherUser)) {
+        if (existingAnotherUser.getFriendRequests().remove(existingUser)) {
             existingUser.getFriends().add(existingAnotherUser);
+            existingAnotherUser.getFriends().add(existingUser);
             userRepository.save(existingUser);
+            userRepository.save(existingAnotherUser);
         }
     }
 
     public void removeFriend(Long id, UUID uuid, Long userId) {
         Users existingUser = checkUser(id, uuid);
         Users existingAnotherUser = get(userId);
-        if (existingUser.getFriends().remove(existingAnotherUser))
+        if (existingUser.getFriends().remove(existingAnotherUser)) {
+            existingAnotherUser.getFriends().remove(existingUser);
             userRepository.save(existingUser);
+            userRepository.save(existingAnotherUser);
+        }
     }
 
     public void blockUser(Long id, UUID uuid, Long userId) {
         Users existingUser = checkUser(id, uuid);
         Users existingAnotherUser = get(userId);
+        if (existingUser == existingAnotherUser)
+            throw new ConflictException("Cannot do actions with yourself");
         if (existingUser.getBlockedUsers().add(existingAnotherUser)) {
             existingUser.getFriendRequests().remove(existingAnotherUser);
             existingUser.getFriendRequestedBy().remove(existingUser);
@@ -139,7 +159,6 @@ public class UserService {
         existingUser.getChats().clear();
         existingUser.getFriends().clear();
         existingUser.getFriendRequests().clear();
-        existingUser.getFriendRequestedBy().clear();
         existingUser.getModeratorAt().clear();
         userRepository.save(existingUser);
     }

@@ -26,18 +26,13 @@ public class MessageController {
         messageService.createByUserInChat(userId, userUuid, chatId, mapper.toMessage(messageCreateDto));
     }
 
-    @PutMapping("/{id}/{userId}&{userUuid}")
-    public void updateByAuthor(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid, @RequestBody MessageCreateDto messageCreateDto) {
-        messageService.updateByAuthor(id, userId, userUuid, messageCreateDto);
+    @PutMapping("/{id}/{userId}&{userUuid}/{newText}")
+    public void updateByAuthor(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid, @PathVariable String newText) {
+        messageService.updateByAuthor(id, userId, userUuid, newText);
     }
 
     @DeleteMapping("/{id}/{userId}&{userUuid}")
-    public void deleteByAuthor(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid) {
-        messageService.deleteByAuthor(id, userId, userUuid);
-    }
-
-    @DeleteMapping("/{id}/{modId}&{modUuid}")
-    public void deleteByMod(@PathVariable Long id, @PathVariable Long modId, @PathVariable UUID modUuid) {
-        messageService.deleteByMod(id, modId, modUuid);
+    public void deleteByAuthorOrMod(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid) {
+        messageService.deleteByAuthorOrMod(id, userId, userUuid);
     }
 }

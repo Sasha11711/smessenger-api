@@ -3,11 +3,13 @@ package com.example.smessenger.controller;
 import com.example.smessenger.dto.user.UserCreateDto;
 import com.example.smessenger.dto.user.UserDto;
 import com.example.smessenger.dto.user.UserInfoDto;
+import com.example.smessenger.dto.user.UserUpdateDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -16,6 +18,11 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
     private final Mapper mapper;
+
+    @GetMapping(value = "/find-by-username/{username}")
+    private List<UserInfoDto> getAllByUsername(@PathVariable(required = false) String username) {
+        return userService.getAllByUsername(username).stream().map(mapper::toUserInfoDto).toList();
+    }
 
     @GetMapping(value = "/{id}")
     private UserInfoDto get(@PathVariable Long id) {
@@ -38,13 +45,13 @@ public class UserController {
     }
 
     @PutMapping("/{id}&{uuid}")
-    public void update(@PathVariable Long id, @PathVariable UUID uuid, @RequestBody UserCreateDto userInfoDto) {
-        userService.update(id, uuid, userInfoDto);
+    public void update(@PathVariable Long id, @PathVariable UUID uuid, @RequestBody UserUpdateDto userUpdateDto) {
+        userService.update(id, uuid, userUpdateDto);
     }
 
-    @PutMapping("/{id}&{uuid}/{username}&{oldPassword}/{newPassword}")
-    public void changePassword(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable String username, @PathVariable String oldPassword, @PathVariable String newPassword) {
-        userService.changePassword(id, uuid, username, oldPassword, newPassword);
+    @PutMapping("/{id}&{uuid}/{login}&{oldPassword}/{newPassword}")
+    public String changePassword(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable String login, @PathVariable String oldPassword, @PathVariable String newPassword) {
+        return userService.changePassword(id, uuid, login, oldPassword, newPassword);
     }
 
     @PutMapping("/{id}&{uuid}/add-request/{userId}")

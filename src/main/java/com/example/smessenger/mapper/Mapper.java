@@ -5,7 +5,6 @@ import com.example.smessenger.dto.chat.ChatDto;
 import com.example.smessenger.dto.chat.ChatInfoDto;
 import com.example.smessenger.dto.message.MessageCreateDto;
 import com.example.smessenger.dto.message.MessageDto;
-import com.example.smessenger.dto.message.MessageInfoDto;
 import com.example.smessenger.dto.user.UserCreateDto;
 import com.example.smessenger.dto.user.UserDto;
 import com.example.smessenger.dto.user.UserInfoDto;
@@ -20,8 +19,6 @@ public interface Mapper {
     ChatDto toChatDto(Chat chat);
 
     Chat toChat(ChatCreateDto chatCreateDto);
-
-    MessageInfoDto toMessageInfoDto(Message message);
 
     MessageDto toMessageDto(Message message);
 
