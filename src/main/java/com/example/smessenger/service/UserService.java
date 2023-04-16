@@ -136,7 +136,7 @@ public class UserService {
             throw new ConflictException("Cannot do actions with yourself");
         if (existingUser.getBlockedUsers().add(existingAnotherUser)) {
             existingUser.getFriendRequests().remove(existingAnotherUser);
-            existingUser.getFriendRequestedBy().remove(existingUser);
+            existingUser.getFriendRequestedBy().remove(existingAnotherUser);
             existingUser.getFriends().remove(existingAnotherUser);
             userRepository.save(existingUser);
         }
