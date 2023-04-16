@@ -94,8 +94,8 @@ public class UserController {
         userService.resetUuid(id, uuid);
     }
 
-    @DeleteMapping("/{id}&{uuid}/{username}&{password}")
-    public void delete(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable String username, @PathVariable String password) {
-        userService.delete(id, uuid, username, password);
+    @DeleteMapping("/{id}&{uuid}/{login}&{password}")
+    public void delete(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable String login, @PathVariable String password) {
+        userService.delete(id, uuid, login, password);
     }
 }

@@ -29,7 +29,7 @@ public class UserService {
     }
 
     public String getIdUuid(String login, String password) {
-        BadRequestException exception = new BadRequestException("Incorrect username or password");
+        BadRequestException exception = new BadRequestException("Incorrect login or password");
         Users existingUser = userRepository.findByLogin(login).orElseThrow(() -> exception);
         if (Objects.equals(existingUser.getPassword(), password))
             return existingUser.getId() + "&" + existingUser.getUuid();
@@ -62,7 +62,7 @@ public class UserService {
     public String changePassword(Long id, UUID uuid, String login, String oldPassword, String newPassword) {
         Users existingUser = checkUser(id, uuid);
         if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), oldPassword))
-            throw new BadRequestException("Incorrect username or password");
+            throw new BadRequestException("Incorrect login or password");
         if (!passwordRegex.matcher(newPassword).matches())
             throw new BadRequestException("Invalid password format");
         existingUser.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
@@ -108,7 +108,6 @@ public class UserService {
         Users existingAnotherUser = get(userId);
         if (existingAnotherUser.getFriendRequests().remove(existingUser)) {
             existingUser.getFriends().add(existingAnotherUser);
-            existingAnotherUser.getFriends().add(existingUser);
             userRepository.save(existingUser);
             userRepository.save(existingAnotherUser);
         }
@@ -150,10 +149,10 @@ public class UserService {
         userRepository.save(existingUser);
     }
 
-    public void delete(Long id, UUID uuid, String username, String password) {
+    public void delete(Long id, UUID uuid, String login, String password) {
         Users existingUser = checkUser(id, uuid);
-        if (!Objects.equals(existingUser.getUsername(), username) || !Objects.equals(existingUser.getPassword(), password))
-            throw new BadRequestException("Incorrect username or password");
+        if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), password))
+            throw new BadRequestException("Incorrect login or password");
         existingUser.setIsDeactivated(true);
         existingUser.setUsername("deactivated user");
         existingUser.getChats().clear();
