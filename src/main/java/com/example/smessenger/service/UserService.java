@@ -29,11 +29,15 @@ public class UserService {
     }
 
     public String getIdUuid(String login, String password) {
-        BadRequestException exception = new BadRequestException("Incorrect login or password");
-        Users existingUser = userRepository.findByLogin(login).orElseThrow(() -> exception);
-        if (Objects.equals(existingUser.getPassword(), password))
-            return existingUser.getId() + "&" + existingUser.getUuid();
-        throw exception;
+        BadRequestException loginPasswordException = new BadRequestException("Incorrect login or password");
+        Users existingUser = userRepository.findByLogin(login).orElseThrow(() -> loginPasswordException);
+
+        if (existingUser.getIsDeactivated())
+            throw new GoneException("You're deactivated");
+        if (!existingUser.getPassword().equals(password))
+            throw loginPasswordException;
+
+        return existingUser.getId() + "&" + existingUser.getUuid();
     }
 
     public void create(Users user) {
