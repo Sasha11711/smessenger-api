@@ -9,8 +9,9 @@ import com.example.smessenger.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,8 +21,8 @@ public class UserController {
     private final Mapper mapper;
 
     @GetMapping(value = "/find-by-username/{username}")
-    private List<UserInfoDto> getAllByUsername(@PathVariable(required = false) String username) {
-        return userService.getAllByUsername(username).stream().map(mapper::toUserInfoDto).toList();
+    private Set<UserInfoDto> getAllByUsername(@PathVariable(required = false) String username) {
+        return userService.getAllByUsername(username).stream().map(mapper::toUserInfoDto).collect(Collectors.toSet());
     }
 
     @GetMapping(value = "/{id}")
@@ -31,7 +32,7 @@ public class UserController {
 
     @GetMapping(value = "/get-full/{id}&{uuid}")
     private UserDto get(@PathVariable Long id, @PathVariable UUID uuid) {
-        return mapper.toUserDto(userService.checkUser(id, uuid));
+        return mapper.toUserDto(userService.checkUser (id, uuid));
     }
 
     @GetMapping(value = "/get-id-uuid/{login}&{password}")

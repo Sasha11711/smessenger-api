@@ -7,7 +7,6 @@ import com.example.smessenger.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +20,7 @@ public class UserService {
     private final Pattern passwordRegex = Pattern.compile("^(?=.*\\d)[\\w-]{12,}$");
 
 
-    public List<Users> getAllByUsername(String username) {
+    public Set<Users> getAllByUsername(String username) {
         return userRepository.findAllByUsernameStartsWith(username);
     }
 
