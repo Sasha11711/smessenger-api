@@ -1,26 +1,24 @@
 package com.example.smessenger.service;
 
 import com.example.smessenger.dto.chat.ChatCreateDto;
-import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.entity.Chat;
+import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
 import com.example.smessenger.repository.ChatRepository;
+import com.example.smessenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
 public class ChatService {
     private final ChatRepository chatRepository;
+    private final MessageRepository messageRepository;
     private final UserService userService;
 
     public Chat get(Long id) {
@@ -36,12 +34,28 @@ public class ChatService {
         return chatRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
     }
 
-    public Set<MessageDto> getMessages(Long id, Long userId, UUID userUuid, Integer page, Integer size) {
+    public Byte[] getImage(Long id, Long userId, UUID userUuid) {
+        //TODO перенести це у віддільну функцію так як це часто використовується {
         Users existingUser = userService.checkUser(userId, userUuid);
         Chat existingChat = get(id);
         if (!existingChat.getUsers().contains(existingUser)) {
             throw new ForbiddenException("User is not in the chat");
         }
+        //TODO }
+        return existingChat.getChatImage();
+    }
+
+    public List<Message> getMessages(Long id, Long userId, UUID userUuid, Integer page, Integer size) {
+        Users existingUser = userService.checkUser(userId, userUuid);
+        Chat existingChat = get(id);
+        if (!existingChat.getUsers().contains(existingUser)) {
+            throw new ForbiddenException("User is not in the chat");
+        }
+        PagedListHolder<Message> pageHolder = new PagedListHolder<>(existingChat.getMessages().stream().toList());
+        pageHolder.setPage(page);
+        pageHolder.setPageSize(size);
+
+        return pageHolder.getPageList();
     }
 
     public void createByUser(Long userId, UUID userUuid, Chat chat) {
@@ -88,7 +102,7 @@ public class ChatService {
     }
 
     public void kickUserByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod =  userService.checkUser(modId, modUuid);
+        Users mod = userService.checkUser(modId, modUuid);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -99,7 +113,7 @@ public class ChatService {
     }
 
     public void banUserByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod =  userService.checkUser(modId, modUuid);
+        Users mod = userService.checkUser(modId, modUuid);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -111,7 +125,7 @@ public class ChatService {
     }
 
     public void unbanUserByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod =  userService.checkUser(modId, modUuid);
+        Users mod = userService.checkUser(modId, modUuid);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -122,7 +136,7 @@ public class ChatService {
     }
 
     public void setModeratorByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod =  userService.checkUser(modId, modUuid);
+        Users mod = userService.checkUser(modId, modUuid);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod) && existingChat.getUsers().contains(existingUser)) {
@@ -133,7 +147,7 @@ public class ChatService {
     }
 
     public void unsetModeratorByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod =  userService.checkUser(modId, modUuid);
+        Users mod = userService.checkUser(modId, modUuid);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -144,7 +158,7 @@ public class ChatService {
     }
 
     public void deleteByMod(Long id, Long modId, UUID modUuid) {
-        Users mod =  userService.checkUser(modId, modUuid);
+        Users mod = userService.checkUser(modId, modUuid);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
             chatRepository.deleteById(id);

@@ -2,6 +2,7 @@ package com.example.smessenger.dto.user;
 
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ public class UserDto {
     private UUID uuid;
 
     private String username;
-    private Byte[] avatar;
+    private Instant registrationInstant;
 
     private Set<Long> chats;
     private Set<Long> moderatorAt;

@@ -27,6 +27,10 @@ public class MessageService {
         return get(id);
     }
 
+    public Byte[] getEmbed(Long id) {
+        return get(id).getEmbedImage();
+    }
+
     public void createByUserInChat(Long userId, UUID userUuid, Long chatId, Message message) {
         Users existingUser = userService.checkUser(userId, userUuid);
         Chat existingChat = chatService.get(chatId);

@@ -12,8 +12,7 @@ public class MessageDto {
     private String text;
     private Instant sentInstant;
     private Boolean isEdited;
-    private Byte[] embedImage;
 
     private Long chatId;
-    private Long authorId;
+    private UserInfoDto author;
 }

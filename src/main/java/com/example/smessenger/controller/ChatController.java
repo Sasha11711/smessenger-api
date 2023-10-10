@@ -7,10 +7,13 @@ import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -30,11 +33,18 @@ public class ChatController {
         return mapper.toChatDto(chatService.getByUser(id, userId, userUuid));
     }
 
+    @GetMapping(value = "/{id}/image")
+    public ByteArrayResource getImage(@PathVariable Long id,
+                             @RequestParam Long userId, @RequestParam UUID userUuid) {
+        Byte[] image = chatService.getImage(id, userId, userUuid);
+        return new ByteArrayResource(ArrayUtils.toPrimitive(image));
+    }
+
     @GetMapping(value = "/{id}/messages")
     public Set<MessageDto> getMessages(@PathVariable Long id,
                                        @RequestParam Long userId, @RequestParam UUID userUuid,
                                        @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "20") Integer size) {
-        return chatService.getMessages(id, userId, userUuid, page, size).stream.
+        return chatService.getMessages(id, userId, userUuid, page, size).stream().map(mapper::toMessageDto).collect(Collectors.toSet());
     }
 
     @PostMapping("/{userId}&{userUuid}")

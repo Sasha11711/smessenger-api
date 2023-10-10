@@ -7,5 +7,4 @@ public class ChatInfoDto {
     private Long id;
 
     private String title;
-    private Byte[] chatImage;
 }

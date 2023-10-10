@@ -12,10 +12,9 @@ public class ChatDto {
     private Long id;
 
     private String title;
-    private Byte[] chatImage;
 
     private MessageDto lastMessage;
-    private Set<Long> usersId;
+    private Set<UserInfoDto> users;
     private Set<Long> moderatorsId;
-    private Set<Long> bannedUsersId;
+    private Set<UserInfoDto> bannedUsers;
 }

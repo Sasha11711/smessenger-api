@@ -5,6 +5,8 @@ import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.MessageService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,6 +21,12 @@ public class MessageController {
     @GetMapping(value = "/{id}/{userId}&{userUuid}")
     public MessageDto get(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid) {
         return mapper.toMessageDto(messageService.get(id, userId, userUuid));
+    }
+
+    @GetMapping(value = "/{id}/embed")
+    public ByteArrayResource getEmbed(@PathVariable Long id) {
+        Byte[] image = messageService.getEmbed(id);
+        return new ByteArrayResource(ArrayUtils.toPrimitive(image));
     }
 
     @PostMapping("/{userId}&{userUuid}/{chatId}")
