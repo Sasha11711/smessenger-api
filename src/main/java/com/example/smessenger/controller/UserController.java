@@ -7,6 +7,8 @@ import com.example.smessenger.dto.user.UserUpdateDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -38,6 +40,12 @@ public class UserController {
     @GetMapping(value = "/get-id-uuid/{login}&{password}")
     public String get(@PathVariable String login, @PathVariable String password) {
         return userService.getIdUuid(login, password);
+    }
+
+    @GetMapping(value = "/{id}/avatar")
+    public ByteArrayResource getAvatar(@PathVariable Long id) {
+        Byte[] avatar = userService.getAvatar(id);
+        return new ByteArrayResource(ArrayUtils.toPrimitive(avatar));
     }
 
     @PostMapping

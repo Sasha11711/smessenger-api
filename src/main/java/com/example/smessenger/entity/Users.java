@@ -47,6 +47,9 @@ public class Users {
     @Column(nullable = false)
     private Boolean isDeactivated = false;
 
+    @Column(name = "chats")
+    private Set<Long> chatsId;
+
     @ManyToMany(mappedBy = "users")
     private Set<Chat> chats;
 

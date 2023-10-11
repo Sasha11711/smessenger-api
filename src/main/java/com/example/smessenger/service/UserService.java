@@ -19,7 +19,6 @@ public class UserService {
     private final Pattern loginRegex = Pattern.compile("^[\\w-]{10,}$");
     private final Pattern passwordRegex = Pattern.compile("^(?=.*\\d)[\\w-]{12,}$");
 
-
     public Set<Users> getAllByUsername(String username) {
         return userRepository.findAllByUsernameStartsWith(username);
     }
@@ -38,6 +37,10 @@ public class UserService {
             throw loginPasswordException;
 
         return existingUser.getId() + "&" + existingUser.getUuid();
+    }
+
+    public Byte[] getAvatar(Long id) {
+        return get(id).getAvatar();
     }
 
     public void create(Users user) {

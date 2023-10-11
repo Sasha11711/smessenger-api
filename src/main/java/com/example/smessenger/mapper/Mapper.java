@@ -11,12 +11,25 @@ import com.example.smessenger.dto.user.UserInfoDto;
 import com.example.smessenger.entity.Chat;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.util.Comparator;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @org.mapstruct.Mapper(componentModel = "spring")
 public interface Mapper {
     ChatInfoDto toChatInfoDto(Chat chat);
 
+    @Mapping(target = "lastMessage", source = "messages", qualifiedByName = "toLastMessage")
     ChatDto toChatDto(Chat chat);
+
+    @Named("toLastMessage")
+    default MessageDto toLastMessage(Set<Message> messages) {
+        //TODO
+        return new MessageDto();
+    }
 
     Chat toChat(ChatCreateDto chatCreateDto);
 
@@ -27,6 +40,14 @@ public interface Mapper {
     UserInfoDto toUserInfoDto(Users user);
 
     UserDto toUserDto(Users user);
+
+    default Set<Long> chatsToLongs(Set<Chat> chats) {
+        return chats.stream().map(Chat::getId).collect(Collectors.toSet());
+    }
+
+    default Set<Long> usersToLongs(Set<Users> users) {
+        return users.stream().map(Users::getId).collect(Collectors.toSet());
+    }
 
     Users toUser(UserCreateDto userCreateDto);
 }

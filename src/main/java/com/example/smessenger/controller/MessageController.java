@@ -25,8 +25,8 @@ public class MessageController {
 
     @GetMapping(value = "/{id}/embed")
     public ByteArrayResource getEmbed(@PathVariable Long id) {
-        Byte[] image = messageService.getEmbed(id);
-        return new ByteArrayResource(ArrayUtils.toPrimitive(image));
+        Byte[] embed = messageService.getEmbed(id);
+        return new ByteArrayResource(ArrayUtils.toPrimitive(embed));
     }
 
     @PostMapping("/{userId}&{userUuid}/{chatId}")
