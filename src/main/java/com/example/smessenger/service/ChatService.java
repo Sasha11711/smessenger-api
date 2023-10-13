@@ -7,18 +7,18 @@ import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
 import com.example.smessenger.repository.ChatRepository;
-import com.example.smessenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.support.PagedListHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
+
+import static com.example.smessenger.MessengerApplication.toPage;
 
 @RequiredArgsConstructor
 @Service
 public class ChatService {
     private final ChatRepository chatRepository;
-    private final MessageRepository messageRepository;
     private final UserService userService;
 
     public Chat get(Long id) {
@@ -31,31 +31,21 @@ public class ChatService {
         if (!existingChat.getUsers().contains(existingUser)) {
             throw new ForbiddenException("User is not in the chat");
         }
-        return chatRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
+        return existingChat;
     }
 
     public Byte[] getImage(Long id, Long userId, UUID userUuid) {
-        //TODO перенести це у віддільну функцію так як це часто використовується {
-        Users existingUser = userService.checkUser(userId, userUuid);
-        Chat existingChat = get(id);
-        if (!existingChat.getUsers().contains(existingUser)) {
-            throw new ForbiddenException("User is not in the chat");
-        }
-        //TODO }
+        Chat existingChat = getByUser(id, userId, userUuid);
         return existingChat.getChatImage();
     }
 
-    public List<Message> getMessages(Long id, Long userId, UUID userUuid, Integer page, Integer size) {
+    public Page<Message> getMessages(Long id, Long userId, UUID userUuid, Pageable pageable) {
         Users existingUser = userService.checkUser(userId, userUuid);
         Chat existingChat = get(id);
         if (!existingChat.getUsers().contains(existingUser)) {
             throw new ForbiddenException("User is not in the chat");
         }
-        PagedListHolder<Message> pageHolder = new PagedListHolder<>(existingChat.getMessages().stream().toList());
-        pageHolder.setPage(page);
-        pageHolder.setPageSize(size);
-
-        return pageHolder.getPageList();
+        return toPage(existingChat.getMessages(), pageable);
     }
 
     public void createByUser(Long userId, UUID userUuid, Chat chat) {
@@ -78,8 +68,7 @@ public class ChatService {
     public void joinUser(Long id, Long userId, Long friendId, UUID friendUuid) {
         Users existingUser = userService.checkUser(userId);
         Users existingFriend = userService.checkUser(friendId, friendUuid);
-        Chat existingChat = get(id);
-        //TODO check if user is even in chat
+        Chat existingChat = getByUser(id, friendId, friendUuid);
         if (existingChat.getBannedUsers().contains(existingUser))
             throw new ForbiddenException("User is banned in the chat");
         if (!existingFriend.getFriends().contains(existingUser))
@@ -93,7 +82,7 @@ public class ChatService {
         Users existingUser = userService.checkUser(userId, userUuid);
         Chat existingChat = get(id);
         if (removeUser(existingChat, existingUser)) {
-            if (existingChat.getUsers().size() == 0) {
+            if (existingChat.getUsers().isEmpty()) {
                 chatRepository.deleteById(id);
             } else {
                 chatRepository.save(existingChat);

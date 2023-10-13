@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -32,7 +33,7 @@ public class Chat {
     private Instant creationInstant = Instant.now();
 
     @OneToMany(mappedBy = "chat", orphanRemoval = true)
-    private Set<Message> messages;
+    private List<Message> messages;
 
     @ManyToMany
     @JoinTable(name = "chat_user",

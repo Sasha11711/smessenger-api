@@ -9,11 +9,10 @@ import com.example.smessenger.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,7 +26,7 @@ public class ChatController {
         return mapper.toChatInfoDto(chatService.get(id));
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/{id}/full")
     public ChatDto getByUser(@PathVariable Long id,
                              @RequestParam Long userId, @RequestParam UUID userUuid) {
         return mapper.toChatDto(chatService.getByUser(id, userId, userUuid));
@@ -41,10 +40,10 @@ public class ChatController {
     }
 
     @GetMapping(value = "/{id}/messages")
-    public Set<MessageDto> getMessages(@PathVariable Long id,
-                                       @RequestParam Long userId, @RequestParam UUID userUuid,
-                                       @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "20") Integer size) {
-        return chatService.getMessages(id, userId, userUuid, page, size).stream().map(mapper::toMessageDto).collect(Collectors.toSet());
+    public Page<MessageDto> getMessages(@PathVariable Long id,
+                                        @RequestParam Long userId, @RequestParam UUID userUuid,
+                                        @RequestParam(defaultValue = "0") Pageable pageable) {
+        return chatService.getMessages(id, userId, userUuid, pageable).map(mapper::toMessageDto);
     }
 
     @PostMapping("/{userId}&{userUuid}")

@@ -13,8 +13,7 @@ import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-
-import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,9 +25,8 @@ public interface Mapper {
     ChatDto toChatDto(Chat chat);
 
     @Named("toLastMessage")
-    default MessageDto toLastMessage(Set<Message> messages) {
-        //TODO
-        return new MessageDto();
+    default Message toLastMessage(List<Message> messages) {
+        return messages.get(messages.size() - 1);
     }
 
     Chat toChat(ChatCreateDto chatCreateDto);
