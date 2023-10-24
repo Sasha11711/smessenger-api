@@ -12,6 +12,7 @@ import com.example.smessenger.entity.Chat;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 import java.util.List;
 import java.util.Set;
@@ -21,13 +22,11 @@ import java.util.stream.Collectors;
 public interface Mapper {
     ChatInfoDto toChatInfoDto(Chat chat);
 
-    @Mapping(target = "lastMessage", source = "messages", qualifiedByName = "toLastMessage")
+    @Mappings({
+            @Mapping(target = "lastMessage", source = "messages", qualifiedByName = "toLastMessage"),
+            @Mapping(target = "moderatorsId", source = "moderators")
+    })
     ChatDto toChatDto(Chat chat);
-
-    @Named("toLastMessage")
-    default Message toLastMessage(List<Message> messages) {
-        return messages.get(messages.size() - 1);
-    }
 
     Chat toChat(ChatCreateDto chatCreateDto);
 
@@ -39,6 +38,8 @@ public interface Mapper {
 
     UserDto toUserDto(Users user);
 
+    Users toUser(UserCreateDto userCreateDto);
+
     default Set<Long> chatsToLongs(Set<Chat> chats) {
         return chats.stream().map(Chat::getId).collect(Collectors.toSet());
     }
@@ -47,5 +48,8 @@ public interface Mapper {
         return users.stream().map(Users::getId).collect(Collectors.toSet());
     }
 
-    Users toUser(UserCreateDto userCreateDto);
+    @Named("toLastMessage")
+    default Message toLastMessage(List<Message> messages) {
+        return messages.get(messages.size() - 1);
+    }
 }

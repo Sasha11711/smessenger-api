@@ -1,5 +1,6 @@
 package com.example.smessenger.dto.user;
 
+import com.example.smessenger.dto.chat.ChatDto;
 import lombok.Data;
 
 import java.time.Instant;
@@ -8,19 +9,13 @@ import java.util.UUID;
 
 @Data
 public class UserDto {
-    private Long id;
-    private UUID uuid;
-
     private String username;
-    private Instant registrationInstant;
 
-    private Set<Long> chats;
+    private Set<ChatDto> chats;
     private Set<Long> moderatorAt;
-    private Set<Long> bannedAt;
 
-    private Set<Long> friends;
-    private Set<Long> friendRequests;
-    private Set<Long> FriendRequestedBy;
-    private Set<Long> blockedUsers;
-    private Set<Long> blockedBy;
+    private Set<UserInfoDto> friends;
+    private Set<UserInfoDto> friendRequests;
+    private Set<UserInfoDto> FriendRequestedBy;
+    private Set<UserInfoDto> blockedUsers;
 }

@@ -1,5 +1,6 @@
 package com.example.smessenger.dto.message;
 
+import com.example.smessenger.dto.chat.ChatInfoDto;
 import com.example.smessenger.dto.user.UserInfoDto;
 import lombok.Data;
 
@@ -13,6 +14,6 @@ public class MessageDto {
     private Instant sentInstant;
     private Boolean isEdited;
 
-    private Long chatId;
+    private ChatInfoDto chat;
     private UserInfoDto author;
 }
