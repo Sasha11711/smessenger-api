@@ -2,10 +2,7 @@ package com.example.smessenger.dto.user;
 
 import com.example.smessenger.dto.chat.ChatDto;
 import lombok.Data;
-
-import java.time.Instant;
 import java.util.Set;
-import java.util.UUID;
 
 @Data
 public class UserDto {
