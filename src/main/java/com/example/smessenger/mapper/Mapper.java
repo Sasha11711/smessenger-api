@@ -40,6 +40,10 @@ public interface Mapper {
 
     Users toUser(UserCreateDto userCreateDto);
 
+    default Set<Long> chatsToLongs(Set<Chat> chats) {
+        return chats.stream().map(Chat::getId).collect(Collectors.toSet());
+    }
+
     default Set<Long> usersToLongs(Set<Users> users) {
         return users.stream().map(Users::getId).collect(Collectors.toSet());
     }
