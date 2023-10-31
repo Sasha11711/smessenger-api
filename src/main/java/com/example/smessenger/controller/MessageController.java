@@ -30,8 +30,8 @@ public class MessageController {
     }
 
     @PostMapping("/{userId}&{userUuid}/{chatId}")
-    public void createByUserInChat(@PathVariable Long userId, @PathVariable UUID userUuid, @PathVariable Long chatId, @RequestBody MessageCreateDto messageCreateDto) {
-        messageService.createByUserInChat(userId, userUuid, chatId, mapper.toMessage(messageCreateDto));
+    public MessageDto createByUserInChat(@PathVariable Long userId, @PathVariable UUID userUuid, @PathVariable Long chatId, @RequestBody MessageCreateDto messageCreateDto) {
+        return mapper.toMessageDto(messageService.createByUserInChat(userId, userUuid, chatId, mapper.toMessage(messageCreateDto)));
     }
 
     @PutMapping("/{id}/{userId}&{userUuid}/{newText}")

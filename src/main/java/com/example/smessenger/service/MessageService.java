@@ -33,7 +33,7 @@ public class MessageService {
         return get(id).getEmbedImage();
     }
 
-    public void createByUserInChat(Long userId, UUID userUuid, Long chatId, Message message) {
+    public Message createByUserInChat(Long userId, UUID userUuid, Long chatId, Message message) {
         Users existingUser = userService.checkUser(userId, userUuid);
         Chat existingChat = chatService.get(chatId);
         if (!existingChat.getUsers().contains(existingUser))
@@ -42,6 +42,7 @@ public class MessageService {
         message.setAuthor(existingUser);
         messageRepository.save(message);
         simpMessagingService.convertAndSend("/chat/" + chatId + "/messageSent", message);
+        return message;
     }
 
     public void updateByAuthor(Long id, Long userId, UUID userUuid, String newText) {

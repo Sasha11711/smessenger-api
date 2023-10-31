@@ -48,11 +48,12 @@ public class ChatService {
         return toPage(existingChat.getMessages(), pageable);
     }
 
-    public void createByUser(Long userId, UUID userUuid, Chat chat) {
+    public Chat createByUser(Long userId, UUID userUuid, Chat chat) {
         Users existingUser = userService.checkUser(userId, userUuid);
         chat.setUsers(Collections.singleton(existingUser));
         chat.setModerators(Collections.singleton(existingUser));
         chatRepository.save(chat);
+        return chat;
     }
 
     public void updateByMod(Long id, Long modId, UUID modUuid, ChatCreateDto chat) {

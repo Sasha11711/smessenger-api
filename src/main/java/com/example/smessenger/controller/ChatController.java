@@ -47,8 +47,8 @@ public class ChatController {
     }
 
     @PostMapping("/{userId}&{userUuid}")
-    public void createByUser(@PathVariable Long userId, @PathVariable UUID userUuid, @RequestBody ChatCreateDto chatCreateDto) {
-        chatService.createByUser(userId, userUuid, mapper.toChat(chatCreateDto));
+    public ChatInfoDto createByUser(@PathVariable Long userId, @PathVariable UUID userUuid, @RequestBody ChatCreateDto chatCreateDto) {
+        return mapper.toChatInfoDto(chatService.createByUser(userId, userUuid, mapper.toChat(chatCreateDto)));
     }
 
     @PutMapping("/{id}/{modId}&{modUuid}")
