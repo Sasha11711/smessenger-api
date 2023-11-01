@@ -8,7 +8,7 @@ import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/chat")
 public class ChatController {
+    private final ResourceLoader resourceLoader = new DefaultResourceLoader();
     private final ChatService chatService;
     private final Mapper mapper;
 
@@ -33,10 +34,12 @@ public class ChatController {
     }
 
     @GetMapping(value = "/{id}/image")
-    public ByteArrayResource getImage(@PathVariable Long id,
+    public Resource getImage(@PathVariable Long id,
                              @RequestParam Long userId, @RequestParam UUID userUuid) {
         Byte[] image = chatService.getImage(id, userId, userUuid);
-        return new ByteArrayResource(ArrayUtils.toPrimitive(image));
+        if (image != null)
+            return new ByteArrayResource(ArrayUtils.toPrimitive(image));
+        return resourceLoader.getResource("../resources/icon.png");
     }
 
     @GetMapping(value = "/{id}/messages")
