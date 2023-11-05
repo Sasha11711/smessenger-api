@@ -37,9 +37,9 @@ public class UserController {
         return mapper.toUserDto(userService.checkUser (id, uuid));
     }
 
-    @GetMapping(value = "/get-id-uuid/{login}&{password}")
-    public String get(@PathVariable String login, @PathVariable String password) {
-        return userService.getIdUuid(login, password);
+    @GetMapping(value = "/get-token/{login}&{password}")
+    public String getToken(@PathVariable String login, @PathVariable String password) {
+        return userService.getToken(login, password);
     }
 
     @GetMapping(value = "/{id}/avatar")

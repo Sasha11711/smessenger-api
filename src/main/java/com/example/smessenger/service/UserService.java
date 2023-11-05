@@ -27,7 +27,7 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
     }
 
-    public String getIdUuid(String login, String password) {
+    public String getToken(String login, String password) {
         BadRequestException loginPasswordException = new BadRequestException("Incorrect login or password");
         Users existingUser = userRepository.findByLogin(login).orElseThrow(() -> loginPasswordException);
 

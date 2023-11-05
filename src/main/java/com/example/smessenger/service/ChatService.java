@@ -34,8 +34,8 @@ public class ChatService {
         return existingChat;
     }
 
-    public Byte[] getImage(Long id, Long userId, UUID userUuid) {
-        Chat existingChat = getByUser(id, userId, userUuid);
+    public Byte[] getImage(Long id) {
+        Chat existingChat = get(id);
         return existingChat.getChatImage();
     }
 

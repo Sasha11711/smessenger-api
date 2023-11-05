@@ -34,9 +34,8 @@ public class ChatController {
     }
 
     @GetMapping(value = "/{id}/image")
-    public Resource getImage(@PathVariable Long id,
-                             @RequestParam Long userId, @RequestParam UUID userUuid) {
-        Byte[] image = chatService.getImage(id, userId, userUuid);
+    public Resource getImage(@PathVariable Long id) {
+        Byte[] image = chatService.getImage(id);
         if (image != null)
             return new ByteArrayResource(ArrayUtils.toPrimitive(image));
         return resourceLoader.getResource("../resources/icon.png");
