@@ -23,32 +23,25 @@ public class ImageService {
         return imageRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
     }
 
+    public Image get(Byte[] image) {
+        return imageRepository.findByImage(image);
+    }
+
     public Image create(Image image) {
+        Image exists = get(image.getImage());
+        if (exists != null) {
+            return exists;
+        }
         imageRepository.save(image);
         return image;
     }
 
-    public void updateByAuthor(Long id, Long userId, UUID userUuid, String newText) {
-        Users existingUser = userService.checkUser(userId, userUuid);
-        Message existingMessage = get(id);
-        if (existingMessage.getAuthor() != existingUser)
-            throw new ForbiddenException("User isn't author");
-        if (newText != null && !newText.equals(existingMessage.getText())) {
-            existingMessage.setIsEdited(true);
-            existingMessage.setText(newText);
-            messageRepository.save(existingMessage);
-            simpMessagingService.convertAndSend("/chat/" + existingMessage.getChat().getId() + "/messageEdited", existingMessage);
-        }
-    }
-
-    public void deleteByAuthorOrMod(Long id, Long userId, UUID userUuid) {
-        Users existingUser = userService.checkUser(userId, userUuid);
-        Message existingMessage = get(id);
-        if (existingMessage.getAuthor() == existingUser || existingMessage.getChat().getModerators().contains(existingUser)){
-            messageRepository.deleteById(id);
-            simpMessagingService.convertAndSend("/chat/" + existingMessage.getChat().getId() + "/messageDeleted", existingMessage);
-        } else {
-            throw new ForbiddenException("User isn't a moderator or an author");
+    public void deleteIfUnused(Long id) {
+        Image image = get(id);
+        if (image.getChats().isEmpty() &&
+            image.getMessages().isEmpty() &&
+            image.getUsers().isEmpty()) {
+            imageRepository.deleteById(id);
         }
     }
 }

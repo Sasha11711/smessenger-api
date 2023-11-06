@@ -156,6 +156,7 @@ public class ChatService {
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
             chatRepository.deleteById(id);
+            imageService.deleteIfUnused(existingChat.getImage().getId());
         }
     }
 

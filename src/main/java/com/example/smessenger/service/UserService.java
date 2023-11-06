@@ -158,9 +158,9 @@ public class UserService {
         Users existingUser = checkUser(id, uuid);
         if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), password))
             throw new BadRequestException("Incorrect login or password");
-
-        existingUser.setIsDeactivated(true);
+        Long avatarId = existingUser.getAvatar().getId();
         existingUser.setUsername("deactivated user");
+        existingUser.setIsDeactivated(true);
         existingUser.setAvatar(null);
         existingUser.getChats().clear();
         existingUser.getModeratorAt().clear();
@@ -175,6 +175,7 @@ public class UserService {
         existingUser.getFriendRequestedBy().clear();
 
         userRepository.save(existingUser);
+        imageService.deleteIfUnused(avatarId);
     }
 
     public Users checkUser(Long id) throws GoneException {

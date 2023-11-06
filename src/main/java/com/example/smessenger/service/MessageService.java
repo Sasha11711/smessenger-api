@@ -18,6 +18,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final ChatService chatService;
     private final UserService userService;
+    private final ImageService imageService;
     private final SimpMessagingTemplate simpMessagingService;
 
     public Message get(Long id) {
@@ -59,6 +60,7 @@ public class MessageService {
         Message existingMessage = get(id);
         if (existingMessage.getAuthor() == existingUser || existingMessage.getChat().getModerators().contains(existingUser)){
             messageRepository.deleteById(id);
+            imageService.deleteIfUnused(existingMessage.getEmbed().getId());
             simpMessagingService.convertAndSend("/chat/" + existingMessage.getChat().getId() + "/messageDeleted", existingMessage);
         } else {
             throw new ForbiddenException("User isn't a moderator or an author");
