@@ -23,12 +23,6 @@ public class MessageController {
         return mapper.toMessageDto(messageService.get(id, userId, userUuid));
     }
 
-    @GetMapping(value = "/{id}/embed")
-    public ByteArrayResource getEmbed(@PathVariable Long id) {
-        Byte[] embed = messageService.getEmbed(id);
-        return new ByteArrayResource(ArrayUtils.toPrimitive(embed));
-    }
-
     @PostMapping("/{userId}&{userUuid}/{chatId}")
     public MessageDto createByUserInChat(@PathVariable Long userId, @PathVariable UUID userUuid, @PathVariable Long chatId, @RequestBody MessageCreateDto messageCreateDto) {
         return mapper.toMessageDto(messageService.createByUserInChat(userId, userUuid, chatId, mapper.toMessage(messageCreateDto)));

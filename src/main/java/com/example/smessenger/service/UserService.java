@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final ImageService imageService;
     private final Pattern loginRegex = Pattern.compile("^[\\w-]{10,}$");
     private final Pattern passwordRegex = Pattern.compile("^(?=.*\\d)[\\w-]{12,}$");
 
@@ -39,10 +40,6 @@ public class UserService {
         return existingUser.getId() + "&" + existingUser.getUuid();
     }
 
-    public Byte[] getAvatar(Long id) {
-        return get(id).getAvatar();
-    }
-
     public void create(Users user) {
         String password = user.getPassword();
         if (!loginRegex.matcher(user.getLogin()).matches())
@@ -58,10 +55,10 @@ public class UserService {
         String newUsername = userUpdateDto.getUsername();
         Byte[] newAvatar = userUpdateDto.getAvatar();
         boolean usernameChangeable = newUsername != null && !newUsername.equals(existingUser.getUsername());
-        boolean avatarChangeable = newAvatar != null && newAvatar != existingUser.getAvatar();
+        boolean avatarChangeable = newAvatar != null && newAvatar != existingUser.getAvatar().getImage();
         if (usernameChangeable || avatarChangeable) {
             if (usernameChangeable) existingUser.setUsername(newUsername);
-            if (avatarChangeable) existingUser.setAvatar(newAvatar);
+            if (avatarChangeable) existingUser.setAvatar(imageService.create(newAvatar));
             userRepository.save(existingUser);
         }
     }

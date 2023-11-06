@@ -1,10 +1,12 @@
 package com.example.smessenger.service;
 
 import com.example.smessenger.entity.Chat;
+import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
+import com.example.smessenger.repository.ImageRepository;
 import com.example.smessenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -14,31 +16,16 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class MessageService {
-    private final MessageRepository messageRepository;
-    private final ChatService chatService;
-    private final UserService userService;
-    private final SimpMessagingTemplate simpMessagingService;
+public class ImageService {
+    private final ImageRepository imageRepository;
 
-    public Message get(Long id) {
-        return messageRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
+    public Image get(Long id) {
+        return imageRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
     }
 
-    public Message get(Long id, Long userId, UUID userUuid) {
-        userService.checkUser(userId, userUuid);
-        return get(id);
-    }
-
-    public Message createByUserInChat(Long userId, UUID userUuid, Long chatId, Message message) {
-        Users existingUser = userService.checkUser(userId, userUuid);
-        Chat existingChat = chatService.get(chatId);
-        if (!existingChat.getUsers().contains(existingUser))
-            throw new ForbiddenException("User is not in the chat");
-        message.setChat(existingChat);
-        message.setAuthor(existingUser);
-        messageRepository.save(message);
-        simpMessagingService.convertAndSend("/chat/" + chatId + "/messageSent", message);
-        return message;
+    public Image create(Image image) {
+        imageRepository.save(image);
+        return image;
     }
 
     public void updateByAuthor(Long id, Long userId, UUID userUuid, String newText) {

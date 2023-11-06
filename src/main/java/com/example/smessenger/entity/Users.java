@@ -36,8 +36,9 @@ public class Users {
     @Column(nullable = false)
     private String username;
 
-    @Lob
-    private Byte[] avatar;
+    @ManyToOne
+    @JoinColumn(name = "avatar_id")
+    private Image avatar;
 
     @ToString.Include
     @Column(nullable = false, updatable = false)
@@ -46,9 +47,6 @@ public class Users {
     @ToString.Include
     @Column(nullable = false)
     private Boolean isDeactivated = false;
-
-    @Column(name = "chats")
-    private Set<Long> chatsId;
 
     @ManyToMany(mappedBy = "users")
     private Set<Chat> chats;

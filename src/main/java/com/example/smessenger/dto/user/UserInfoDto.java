@@ -9,4 +9,5 @@ public class UserInfoDto {
     private Long id;
 
     private String username;
+    private Long avatarId;
 }

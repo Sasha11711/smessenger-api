@@ -2,6 +2,7 @@ package com.example.smessenger.service;
 
 import com.example.smessenger.dto.chat.ChatCreateDto;
 import com.example.smessenger.entity.Chat;
+import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
@@ -13,13 +14,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
-import static com.example.smessenger.MessengerApplication.toPage;
+import static com.example.smessenger.mapper.Mapper.toPage;
 
 @RequiredArgsConstructor
 @Service
 public class ChatService {
     private final ChatRepository chatRepository;
     private final UserService userService;
+    private final ImageService imageService;
 
     public Chat get(Long id) {
         return chatRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
@@ -32,11 +34,6 @@ public class ChatService {
             throw new ForbiddenException("User is not in the chat");
         }
         return existingChat;
-    }
-
-    public Byte[] getImage(Long id) {
-        Chat existingChat = get(id);
-        return existingChat.getChatImage();
     }
 
     public Page<Message> getMessages(Long id, Long userId, UUID userUuid, Pageable pageable) {
@@ -60,9 +57,16 @@ public class ChatService {
         Users mod = userService.checkUser(modId, modUuid);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
-            existingChat.setTitle(chat.getTitle());
-            existingChat.setChatImage(chat.getChatImage());
-            chatRepository.save(existingChat);
+            String newTitle = chat.getTitle();
+            Image newImage = new Image();
+            newImage.setImage(chat.getChatImage());
+            boolean titleChangeable = newTitle != null && !newTitle.equals(existingChat.getTitle());
+            boolean imageChangeable = newImage.getImage() != null && newImage.getImage() != existingChat.getImage().getImage();
+            if (titleChangeable || imageChangeable) {
+                if (titleChangeable) existingChat.setTitle(newTitle);
+                if (imageChangeable) existingChat.setImage(newImage);
+                chatRepository.save(existingChat);
+            }
         }
     }
 

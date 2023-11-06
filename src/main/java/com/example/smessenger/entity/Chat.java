@@ -25,8 +25,9 @@ public class Chat {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    private Byte[] chatImage;
+    @ManyToOne
+    @JoinColumn(name = "image_id")
+    private Image image;
 
     @ToString.Include
     @Column(nullable = false, updatable = false)

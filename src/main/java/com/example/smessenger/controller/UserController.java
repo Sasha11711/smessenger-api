@@ -42,12 +42,6 @@ public class UserController {
         return userService.getToken(login, password);
     }
 
-    @GetMapping(value = "/{id}/avatar")
-    public ByteArrayResource getAvatar(@PathVariable Long id) {
-        Byte[] avatar = userService.getAvatar(id);
-        return new ByteArrayResource(ArrayUtils.toPrimitive(avatar));
-    }
-
     @PostMapping
     public void create(@RequestBody UserCreateDto userInfoDto) {
         userService.create(mapper.toUser(userInfoDto));

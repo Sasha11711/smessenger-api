@@ -7,6 +7,7 @@ import java.util.Set;
 @Data
 public class UserDto {
     private String username;
+    private Long avatarId;
 
     private Set<ChatDto> chats;
     private Set<Long> moderatorAt;

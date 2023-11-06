@@ -12,6 +12,7 @@ public class ChatDto {
     private Long id;
 
     private String title;
+    private Long imageId;
 
     private MessageDto lastMessage;
     private Set<UserInfoDto> users;

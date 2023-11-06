@@ -31,8 +31,9 @@ public class Message {
     @Column(nullable = false)
     private Boolean isEdited = false;
 
-    @Lob
-    private Byte[] embedImage;
+    @ManyToOne
+    @JoinColumn(name = "embed_id")
+    private Image embed;
 
     @ManyToOne
     @JoinColumn(name = "chat_id")

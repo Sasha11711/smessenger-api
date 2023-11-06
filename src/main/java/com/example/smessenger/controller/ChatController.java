@@ -33,14 +33,6 @@ public class ChatController {
         return mapper.toChatDto(chatService.getByUser(id, userId, userUuid));
     }
 
-    @GetMapping(value = "/{id}/image")
-    public Resource getImage(@PathVariable Long id) {
-        Byte[] image = chatService.getImage(id);
-        if (image != null)
-            return new ByteArrayResource(ArrayUtils.toPrimitive(image));
-        return resourceLoader.getResource("../resources/icon.png");
-    }
-
     @GetMapping(value = "/{id}/messages")
     public Page<MessageDto> getMessages(@PathVariable Long id,
                                         @RequestParam Long userId, @RequestParam UUID userUuid,

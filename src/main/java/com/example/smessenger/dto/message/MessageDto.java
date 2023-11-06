@@ -11,6 +11,7 @@ public class MessageDto {
     private Long id;
 
     private String text;
+    private Long embedId;
     private Instant sentInstant;
     private Boolean isEdited;
 
