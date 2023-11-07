@@ -8,5 +8,4 @@ public class UserCreateDto {
     private String password;
 
     private String username;
-    private Byte[] avatar;
 }

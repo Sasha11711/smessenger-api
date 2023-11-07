@@ -1,18 +1,10 @@
 package com.example.smessenger.service;
 
-import com.example.smessenger.entity.Chat;
 import com.example.smessenger.entity.Image;
-import com.example.smessenger.entity.Message;
-import com.example.smessenger.entity.Users;
-import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
 import com.example.smessenger.repository.ImageRepository;
-import com.example.smessenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -39,8 +31,8 @@ public class ImageService {
     public void deleteIfUnused(Long id) {
         Image image = get(id);
         if (image.getChats().isEmpty() &&
-            image.getMessages().isEmpty() &&
-            image.getUsers().isEmpty()) {
+                image.getMessages().isEmpty() &&
+                image.getUsers().isEmpty()) {
             imageRepository.deleteById(id);
         }
     }

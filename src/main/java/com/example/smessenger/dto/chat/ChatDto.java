@@ -4,7 +4,6 @@ import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.dto.user.UserInfoDto;
 import lombok.Data;
 
-import java.time.Instant;
 import java.util.Set;
 
 @Data

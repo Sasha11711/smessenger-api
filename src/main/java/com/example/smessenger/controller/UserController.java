@@ -7,8 +7,6 @@ import com.example.smessenger.dto.user.UserUpdateDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;

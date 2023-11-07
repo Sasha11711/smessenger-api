@@ -1,6 +1,7 @@
 package com.example.smessenger.service;
 
 import com.example.smessenger.entity.Chat;
+import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
@@ -35,6 +36,9 @@ public class MessageService {
         Chat existingChat = chatService.get(chatId);
         if (!existingChat.getUsers().contains(existingUser))
             throw new ForbiddenException("User is not in the chat");
+        Image embed = message.getEmbed();
+        if (embed != null)
+            message.setEmbed(imageService.create(embed));
         message.setChat(existingChat);
         message.setAuthor(existingUser);
         messageRepository.save(message);

@@ -1,6 +1,7 @@
 package com.example.smessenger.service;
 
 import com.example.smessenger.dto.user.UserUpdateDto;
+import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.*;
 import com.example.smessenger.repository.UserRepository;
@@ -50,12 +51,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void update(Long id, UUID uuid, UserUpdateDto userUpdateDto) {
+    public void update(Long id, UUID uuid, UserUpdateDto user) {
         Users existingUser = checkUser(id, uuid);
-        String newUsername = userUpdateDto.getUsername();
-        Byte[] newAvatar = userUpdateDto.getAvatar();
+        String newUsername = user.getUsername();
+        Image newAvatar = user.getAvatar();
         boolean usernameChangeable = newUsername != null && !newUsername.equals(existingUser.getUsername());
-        boolean avatarChangeable = newAvatar != null && newAvatar != existingUser.getAvatar().getImage();
+        boolean avatarChangeable = newAvatar != null && newAvatar != existingUser.getAvatar();
         if (usernameChangeable || avatarChangeable) {
             if (usernameChangeable) existingUser.setUsername(newUsername);
             if (avatarChangeable) existingUser.setAvatar(imageService.create(newAvatar));
@@ -161,7 +162,7 @@ public class UserService {
         Long avatarId = existingUser.getAvatar().getId();
         existingUser.setUsername("deactivated user");
         existingUser.setIsDeactivated(true);
-        existingUser.setAvatar(null);
+        existingUser.setAvatar(imageService.get(1L));
         existingUser.getChats().clear();
         existingUser.getModeratorAt().clear();
         existingUser.getBlockedUsers().clear();

@@ -47,6 +47,7 @@ public class ChatService {
 
     public Chat createByUser(Long userId, UUID userUuid, Chat chat) {
         Users existingUser = userService.checkUser(userId, userUuid);
+        chat.setImage(imageService.create(chat.getImage()));
         chat.setUsers(Collections.singleton(existingUser));
         chat.setModerators(Collections.singleton(existingUser));
         chatRepository.save(chat);
@@ -58,8 +59,7 @@ public class ChatService {
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
             String newTitle = chat.getTitle();
-            Image newImage = new Image();
-            newImage.setImage(chat.getChatImage());
+            Image newImage = imageService.create(chat.getImage());
             boolean titleChangeable = newTitle != null && !newTitle.equals(existingChat.getTitle());
             boolean imageChangeable = newImage.getImage() != null && newImage.getImage() != existingChat.getImage().getImage();
             if (titleChangeable || imageChangeable) {

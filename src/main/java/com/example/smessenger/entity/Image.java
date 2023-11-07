@@ -26,8 +26,8 @@ public class Image {
     private List<Chat> chats;
 
     @OneToMany(mappedBy = "embed")
-    private List<Chat> messages;
+    private List<Message> messages;
 
     @OneToMany(mappedBy = "avatar")
-    private List<Chat> users;
+    private List<Users> users;
 }

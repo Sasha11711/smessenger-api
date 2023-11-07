@@ -24,13 +24,6 @@ import java.util.stream.Collectors;
 
 @org.mapstruct.Mapper(componentModel = "spring")
 public interface Mapper {
-    static <T> Page<T> toPage(List<T> objs, Pageable pageable) {
-        int start = (int)pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), objs.size());
-        List<T> subObjs = objs.subList(start, end);
-
-        return new PageImpl<>(subObjs, pageable, objs.size());
-    }
 
     ChatInfoDto toChatInfoDto(Chat chat);
 
@@ -63,5 +56,13 @@ public interface Mapper {
     @Named("toLastMessage")
     default Message toLastMessage(List<Message> messages) {
         return messages.get(messages.size() - 1);
+    }
+    
+    static <T> Page<T> toPage(List<T> objs, Pageable pageable) {
+        int start = (int)pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), objs.size());
+        List<T> subObjs = objs.subList(start, end);
+
+        return new PageImpl<>(subObjs, pageable, objs.size());
     }
 }

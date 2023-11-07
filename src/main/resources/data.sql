@@ -1,1 +1,1 @@
-INSERT INTO image (image) VALUES ('classpath:icon.png')
+INSERT INTO image (image) VALUES (lo_import('icon.png'))

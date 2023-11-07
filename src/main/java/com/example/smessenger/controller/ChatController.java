@@ -7,8 +7,6 @@ import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.ChatService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.core.io.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +16,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/chat")
 public class ChatController {
-    private final ResourceLoader resourceLoader = new DefaultResourceLoader();
     private final ChatService chatService;
     private final Mapper mapper;
 
