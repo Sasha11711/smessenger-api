@@ -15,7 +15,7 @@ public class ImageService {
         return imageRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
     }
 
-    public Image get(Byte[] image) {
+    public Image get(byte[] image) {
         return imageRepository.findByImage(image);
     }
 

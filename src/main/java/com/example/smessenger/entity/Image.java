@@ -20,7 +20,7 @@ public class Image {
     private Long id;
 
     @Lob
-    private Byte[] image;
+    private byte[] image;
 
     @OneToMany(mappedBy = "image")
     private List<Chat> chats;

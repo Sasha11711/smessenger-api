@@ -1,6 +1,5 @@
 package com.example.smessenger.controller;
 
-import com.example.smessenger.entity.Image;
 import com.example.smessenger.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +14,7 @@ public class ImageController {
     private final ImageService imageService;
 
     @GetMapping(value = "/{id}")
-    public Image get(@PathVariable Long id) {
-        return imageService.get(id);
+    public byte[] get(@PathVariable Long id) {
+        return imageService.get(id).getImage();
     }
 }
