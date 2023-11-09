@@ -9,6 +9,7 @@ import com.example.smessenger.dto.user.UserCreateDto;
 import com.example.smessenger.dto.user.UserDto;
 import com.example.smessenger.dto.user.UserInfoDto;
 import com.example.smessenger.entity.Chat;
+import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import org.mapstruct.Mapping;
@@ -44,6 +45,10 @@ public interface Mapper {
     UserDto toUserDto(Users user);
 
     Users toUser(UserCreateDto userCreateDto);
+
+    default Long imageToLong(Image image) {
+        return image.getId();
+    }
 
     default Set<Long> chatsToLongs(Set<Chat> chats) {
         return chats.stream().map(Chat::getId).collect(Collectors.toSet());
