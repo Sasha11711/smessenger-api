@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -30,9 +29,9 @@ public class UserController {
         return mapper.toUserInfoDto(userService.get(id));
     }
 
-    @GetMapping(value = "/get-full/{id}&{uuid}")
-    public UserDto get(@PathVariable Long id, @PathVariable UUID uuid) {
-        return mapper.toUserDto(userService.checkUser (id, uuid));
+    @GetMapping(value = "/get-full")
+    public UserDto get(@RequestParam String token) {
+        return mapper.toUserDto(userService.checkUser(token));
     }
 
     @GetMapping(value = "/get-token/{login}&{password}")
@@ -45,58 +44,67 @@ public class UserController {
         userService.create(mapper.toUser(userInfoDto));
     }
 
-    @PutMapping("/{id}&{uuid}")
-    public void update(@PathVariable Long id, @PathVariable UUID uuid, @RequestBody UserUpdateDto userUpdateDto) {
-        userService.update(id, uuid, userUpdateDto);
+    @PutMapping
+    public void update(@RequestParam String token,
+                       @RequestBody UserUpdateDto userUpdateDto) {
+        userService.update(token, userUpdateDto);
     }
 
-    @PutMapping("/{id}&{uuid}/{login}&{oldPassword}/{newPassword}")
-    public String changePassword(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable String login, @PathVariable String oldPassword, @PathVariable String newPassword) {
-        return userService.changePassword(id, uuid, login, oldPassword, newPassword);
+    @PutMapping("/change-password")
+    public String changePassword(@RequestParam String token, @RequestParam String login, @RequestParam String oldPassword,
+                                 @RequestBody String newPassword) {
+        return userService.changePassword(token, login, oldPassword, newPassword);
     }
 
-    @PutMapping("/{id}&{uuid}/add-request/{userId}")
-    public void addFriendRequest(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable Long userId) {
-        userService.addFriendRequest(id, uuid, userId);
+    @PutMapping("/add-request/{userId}")
+    public void addFriendRequest(@PathVariable Long userId,
+                                 @RequestParam String token) {
+        userService.addFriendRequest(token, userId);
     }
 
-    @PutMapping("/{id}&{uuid}/remove-request/{userId}")
-    public void removeFriendRequest(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable Long userId) {
-        userService.removeFriendRequest(id, uuid, userId);
+    @PutMapping("/remove-request/{userId}")
+    public void removeFriendRequest(@PathVariable Long userId,
+                                    @RequestParam String token) {
+        userService.removeFriendRequest(token, userId);
     }
 
-    @PutMapping("/{id}&{uuid}/decline-request/{userId}")
-    public void declineFriendRequest(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable Long userId) {
-        userService.declineFriendRequest(id, uuid, userId);
+    @PutMapping("/decline-request/{userId}")
+    public void declineFriendRequest(@PathVariable Long userId,
+                                     @RequestParam String token) {
+        userService.declineFriendRequest(token, userId);
     }
 
-    @PutMapping("/{id}&{uuid}/accept-request/{userId}")
-    public void acceptFriendRequest(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable Long userId) {
-        userService.acceptFriendRequest(id, uuid, userId);
+    @PutMapping("/accept-request/{userId}")
+    public void acceptFriendRequest(@PathVariable Long userId,
+                                    @RequestParam String token) {
+        userService.acceptFriendRequest(token, userId);
     }
 
-    @PutMapping("/{id}&{uuid}/remove-friend/{userId}")
-    public void removeFriend(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable Long userId) {
-        userService.removeFriend(id, uuid, userId);
+    @PutMapping("/remove-friend/{userId}")
+    public void removeFriend(@PathVariable Long userId,
+                             @RequestParam String token) {
+        userService.removeFriend(token, userId);
     }
 
-    @PutMapping("/{id}&{uuid}/block/{userId}")
-    public void blockUser(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable Long userId) {
-        userService.blockUser(id, uuid, userId);
+    @PutMapping("/block/{userId}")
+    public void blockUser(@PathVariable Long userId,
+                          @RequestParam String token) {
+        userService.blockUser(token, userId);
     }
 
-    @PutMapping("/{id}&{uuid}/unblock/{userId}")
-    public void unblockUser(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable Long userId) {
-        userService.unblockUser(id, uuid, userId);
+    @PutMapping("/unblock/{userId}")
+    public void unblockUser(@PathVariable Long userId,
+                            @RequestParam String token) {
+        userService.unblockUser(token, userId);
     }
 
-    @PutMapping("/{id}&{uuid}/reset-uuid")
-    public void resetUuid(@PathVariable Long id, @PathVariable UUID uuid) {
-        userService.resetUuid(id, uuid);
+    @PutMapping("/reset-uuid")
+    public void resetUuid(@RequestParam String token) {
+        userService.resetUuid(token);
     }
 
-    @DeleteMapping("/{id}&{uuid}/{login}&{password}")
-    public void delete(@PathVariable Long id, @PathVariable UUID uuid, @PathVariable String login, @PathVariable String password) {
-        userService.delete(id, uuid, login, password);
+    @DeleteMapping
+    public void delete(@RequestParam String token, @RequestParam String login, @RequestParam String password) {
+        userService.delete(token, login, password);
     }
 }

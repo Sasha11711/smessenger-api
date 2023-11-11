@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 @Service
 public class MessageService {
@@ -26,13 +24,13 @@ public class MessageService {
         return messageRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
     }
 
-    public Message get(Long id, Long userId, UUID userUuid) {
-        userService.checkUser(userId, userUuid);
+    public Message get(Long id, String token) {
+        userService.checkUser(token);
         return get(id);
     }
 
-    public Message createByUserInChat(Long userId, UUID userUuid, Long chatId, Message message) {
-        Users existingUser = userService.checkUser(userId, userUuid);
+    public Message createByUserInChat(Long chatId, String token, Message message) {
+        Users existingUser = userService.checkUser(token);
         Chat existingChat = chatService.get(chatId);
         if (!existingChat.getUsers().contains(existingUser))
             throw new ForbiddenException("User is not in the chat");
@@ -46,8 +44,8 @@ public class MessageService {
         return message;
     }
 
-    public void updateByAuthor(Long id, Long userId, UUID userUuid, String newText) {
-        Users existingUser = userService.checkUser(userId, userUuid);
+    public void updateByAuthor(Long id, String token, String newText) {
+        Users existingUser = userService.checkUser(token);
         Message existingMessage = get(id);
         if (existingMessage.getAuthor() != existingUser)
             throw new ForbiddenException("User isn't author");
@@ -59,10 +57,10 @@ public class MessageService {
         }
     }
 
-    public void deleteByAuthorOrMod(Long id, Long userId, UUID userUuid) {
-        Users existingUser = userService.checkUser(userId, userUuid);
+    public void deleteByAuthorOrMod(Long id, String token) {
+        Users existingUser = userService.checkUser(token);
         Message existingMessage = get(id);
-        if (existingMessage.getAuthor() == existingUser || existingMessage.getChat().getModerators().contains(existingUser)){
+        if (existingMessage.getAuthor() == existingUser || existingMessage.getChat().getModerators().contains(existingUser)) {
             messageRepository.deleteById(id);
             imageService.deleteIfUnused(existingMessage.getEmbed().getId());
             simpMessagingService.convertAndSend("/chat/" + existingMessage.getChat().getId() + "/messageDeleted", existingMessage);

@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.Collections;
 
 import static com.example.smessenger.mapper.Mapper.toPage;
 
@@ -27,8 +28,8 @@ public class ChatService {
         return chatRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
     }
 
-    public Chat getByUser(Long id, Long userId, UUID userUuid) {
-        Users existingUser = userService.checkUser(userId, userUuid);
+    public Chat getByUser(Long id, String token) {
+        Users existingUser = userService.checkUser(token);
         Chat existingChat = get(id);
         if (!existingChat.getUsers().contains(existingUser)) {
             throw new ForbiddenException("User is not in the chat");
@@ -36,8 +37,8 @@ public class ChatService {
         return existingChat;
     }
 
-    public Page<Message> getMessages(Long id, Long userId, UUID userUuid, Pageable pageable) {
-        Users existingUser = userService.checkUser(userId, userUuid);
+    public Page<Message> getMessages(Long id, String token, Pageable pageable) {
+        Users existingUser = userService.checkUser(token);
         Chat existingChat = get(id);
         if (!existingChat.getUsers().contains(existingUser)) {
             throw new ForbiddenException("User is not in the chat");
@@ -45,8 +46,8 @@ public class ChatService {
         return toPage(existingChat.getMessages(), pageable);
     }
 
-    public Chat createByUser(Long userId, UUID userUuid, Chat chat) {
-        Users existingUser = userService.checkUser(userId, userUuid);
+    public Chat createByUser(String token, Chat chat) {
+        Users existingUser = userService.checkUser(token);
         chat.setImage(imageService.create(chat.getImage()));
         chat.setUsers(Collections.singleton(existingUser));
         chat.setModerators(Collections.singleton(existingUser));
@@ -54,8 +55,8 @@ public class ChatService {
         return chat;
     }
 
-    public void updateByMod(Long id, Long modId, UUID modUuid, ChatCreateDto chat) {
-        Users mod = userService.checkUser(modId, modUuid);
+    public void updateByMod(Long id, String token, ChatCreateDto chat) {
+        Users mod = userService.checkUser(token);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
             String newTitle = chat.getTitle();
@@ -70,10 +71,10 @@ public class ChatService {
         }
     }
 
-    public void joinUser(Long id, Long userId, Long friendId, UUID friendUuid) {
+    public void addUser(Long id, Long userId, String token) {
         Users existingUser = userService.checkUser(userId);
-        Users existingFriend = userService.checkUser(friendId, friendUuid);
-        Chat existingChat = getByUser(id, friendId, friendUuid);
+        Users existingFriend = userService.checkUser(token);
+        Chat existingChat = getByUser(id, token);
         if (existingChat.getBannedUsers().contains(existingUser))
             throw new ForbiddenException("User is banned in the chat");
         if (!existingFriend.getFriends().contains(existingUser))
@@ -83,8 +84,8 @@ public class ChatService {
         }
     }
 
-    public void leaveUser(Long id, Long userId, UUID userUuid) {
-        Users existingUser = userService.checkUser(userId, userUuid);
+    public void leaveUser(Long id, String token) {
+        Users existingUser = userService.checkUser(token);
         Chat existingChat = get(id);
         if (removeUser(existingChat, existingUser)) {
             if (existingChat.getUsers().isEmpty()) {
@@ -95,8 +96,8 @@ public class ChatService {
         }
     }
 
-    public void kickUserByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod = userService.checkUser(modId, modUuid);
+    public void kickUserByMod(Long id, Long userId, String token) {
+        Users mod = userService.checkUser(token);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -106,8 +107,8 @@ public class ChatService {
         }
     }
 
-    public void banUserByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod = userService.checkUser(modId, modUuid);
+    public void banUserByMod(Long id, Long userId, String token) {
+        Users mod = userService.checkUser(token);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -118,8 +119,8 @@ public class ChatService {
         }
     }
 
-    public void unbanUserByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod = userService.checkUser(modId, modUuid);
+    public void unbanUserByMod(Long id, Long userId, String token) {
+        Users mod = userService.checkUser(token);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -129,8 +130,8 @@ public class ChatService {
         }
     }
 
-    public void setModeratorByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod = userService.checkUser(modId, modUuid);
+    public void setModeratorByMod(Long id, Long userId, String token) {
+        Users mod = userService.checkUser(token);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod) && existingChat.getUsers().contains(existingUser)) {
@@ -140,8 +141,8 @@ public class ChatService {
         }
     }
 
-    public void unsetModeratorByMod(Long id, Long userId, Long modId, UUID modUuid) {
-        Users mod = userService.checkUser(modId, modUuid);
+    public void unsetModeratorByMod(Long id, Long userId, String token) {
+        Users mod = userService.checkUser(token);
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
@@ -151,8 +152,8 @@ public class ChatService {
         }
     }
 
-    public void deleteByMod(Long id, Long modId, UUID modUuid) {
-        Users mod = userService.checkUser(modId, modUuid);
+    public void deleteByMod(Long id, String token) {
+        Users mod = userService.checkUser(token);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
             chatRepository.deleteById(id);

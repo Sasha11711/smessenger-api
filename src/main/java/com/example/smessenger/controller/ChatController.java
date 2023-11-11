@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,64 +25,75 @@ public class ChatController {
 
     @GetMapping(value = "/{id}/full")
     public ChatDto getByUser(@PathVariable Long id,
-                             @RequestParam Long userId, @RequestParam UUID userUuid) {
-        return mapper.toChatDto(chatService.getByUser(id, userId, userUuid));
+                             @RequestParam String token) {
+        return mapper.toChatDto(chatService.getByUser(id, token));
     }
 
     @GetMapping(value = "/{id}/messages")
     public Page<MessageDto> getMessages(@PathVariable Long id,
-                                        @RequestParam Long userId, @RequestParam UUID userUuid,
+                                        @RequestParam String token,
                                         @RequestParam(defaultValue = "0") Pageable pageable) {
-        return chatService.getMessages(id, userId, userUuid, pageable).map(mapper::toMessageDto);
+        return chatService.getMessages(id, token, pageable).map(mapper::toMessageDto);
     }
 
-    @PostMapping("/{userId}&{userUuid}")
-    public ChatInfoDto createByUser(@PathVariable Long userId, @PathVariable UUID userUuid, @RequestBody ChatCreateDto chatCreateDto) {
-        return mapper.toChatInfoDto(chatService.createByUser(userId, userUuid, mapper.toChat(chatCreateDto)));
+    @PostMapping
+    public ChatInfoDto createByUser(@RequestParam String token,
+                                    @RequestBody ChatCreateDto chatCreateDto) {
+        return mapper.toChatInfoDto(chatService.createByUser(token, mapper.toChat(chatCreateDto)));
     }
 
-    @PutMapping("/{id}/{modId}&{modUuid}")
-    public void updateByMod(@PathVariable Long id, @PathVariable Long modId, @PathVariable UUID modUuid, @RequestBody ChatCreateDto chatCreateDto) {
-        chatService.updateByMod(id, modId, modUuid, chatCreateDto);
+    @PutMapping("/{id}")
+    public void updateByMod(@PathVariable Long id,
+                            @RequestParam String token,
+                            @RequestBody ChatCreateDto chatCreateDto) {
+        chatService.updateByMod(id, token, chatCreateDto);
     }
 
-    @PutMapping("/{id}/join/{userId}/{friendId}&{friendUuid}")
-    public void joinUser(@PathVariable Long id, @PathVariable Long userId, @PathVariable Long friendId, @PathVariable UUID friendUuid) {
-        chatService.joinUser(id, userId, friendId, friendUuid);
+    @PutMapping("/{id}/add/{userId}")
+    public void addUser(@PathVariable Long id, @PathVariable Long userId,
+                        @RequestParam String token) {
+        chatService.addUser(id, userId, token);
     }
 
-    @PutMapping("/{id}/leave/{userId}&{userUuid}")
-    public void leaveUser(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid) {
-        chatService.leaveUser(id, userId, userUuid);
+    @PutMapping("/{id}/leave")
+    public void leaveUser(@PathVariable Long id,
+                          @RequestParam String token) {
+        chatService.leaveUser(id, token);
     }
 
-    @PutMapping("/{id}/kick/{userId}/{modId}&{modUuid}")
-    public void kickUserByMod(@PathVariable Long id, @PathVariable Long userId, @PathVariable Long modId, @PathVariable UUID modUuid) {
-        chatService.kickUserByMod(id, userId, modId, modUuid);
+    @PutMapping("/{id}/kick/{userId}")
+    public void kickUserByMod(@PathVariable Long id, @PathVariable Long userId,
+                              @RequestParam String token) {
+        chatService.kickUserByMod(id, userId, token);
     }
 
-    @PutMapping("/{id}/ban/{userId}/{modId}&{modUuid}")
-    public void banUserByMod(@PathVariable Long id, @PathVariable Long userId, @PathVariable Long modId, @PathVariable UUID modUuid) {
-        chatService.banUserByMod(id, userId, modId, modUuid);
+    @PutMapping("/{id}/ban/{userId}")
+    public void banUserByMod(@PathVariable Long id, @PathVariable Long userId,
+                             @RequestParam String token) {
+        chatService.banUserByMod(id, userId, token);
     }
 
-    @PutMapping("/{id}/unban/{userId}/{modId}&{modUuid}")
-    public void unbanUserByMod(@PathVariable Long id, @PathVariable Long userId, @PathVariable Long modId, @PathVariable UUID modUuid) {
-        chatService.unbanUserByMod(id, userId, modId, modUuid);
+    @PutMapping("/{id}/unban/{userId}")
+    public void unbanUserByMod(@PathVariable Long id, @PathVariable Long userId,
+                               @RequestParam String token) {
+        chatService.unbanUserByMod(id, userId, token);
     }
 
-    @PutMapping("/{id}/mod/{userId}/{modId}&{modUuid}")
-    public void setModeratorByMod(@PathVariable Long id, @PathVariable Long userId, @PathVariable Long modId, @PathVariable UUID modUuid) {
-        chatService.setModeratorByMod(id, userId, modId, modUuid);
+    @PutMapping("/{id}/mod/{userId}")
+    public void setModeratorByMod(@PathVariable Long id, @PathVariable Long userId,
+                                  @RequestParam String token) {
+        chatService.setModeratorByMod(id, userId, token);
     }
 
-    @PutMapping("/{id}/unmod/{userId}/{modId}&{modUuid}")
-    public void unsetModeratorByMod(@PathVariable Long id, @PathVariable Long userId, @PathVariable Long modId, @PathVariable UUID modUuid) {
-        chatService.unsetModeratorByMod(id, userId, modId, modUuid);
+    @PutMapping("/{id}/unmod/{userId}")
+    public void unsetModeratorByMod(@PathVariable Long id, @PathVariable Long userId,
+                                    @RequestParam String token) {
+        chatService.unsetModeratorByMod(id, userId, token);
     }
 
-    @DeleteMapping("/{id}/{modId}&{modUuid}")
-    public void deleteByMod(@PathVariable Long id, @PathVariable Long modId, @PathVariable UUID modUuid) {
-        chatService.deleteByMod(id, modId, modUuid);
+    @DeleteMapping("/{id}")
+    public void deleteByMod(@PathVariable Long id,
+                            @RequestParam String token) {
+        chatService.deleteByMod(id, token);
     }
 }

@@ -7,8 +7,6 @@ import com.example.smessenger.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/message")
@@ -16,23 +14,28 @@ public class MessageController {
     private final MessageService messageService;
     private final Mapper mapper;
 
-    @GetMapping(value = "/{id}/{userId}&{userUuid}")
-    public MessageDto get(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid) {
-        return mapper.toMessageDto(messageService.get(id, userId, userUuid));
+    @GetMapping(value = "/{id}")
+    public MessageDto get(@PathVariable Long id,
+                          @RequestParam String token) {
+        return mapper.toMessageDto(messageService.get(id, token));
     }
 
-    @PostMapping("/{userId}&{userUuid}/{chatId}")
-    public MessageDto createByUserInChat(@PathVariable Long userId, @PathVariable UUID userUuid, @PathVariable Long chatId, @RequestBody MessageCreateDto messageCreateDto) {
-        return mapper.toMessageDto(messageService.createByUserInChat(userId, userUuid, chatId, mapper.toMessage(messageCreateDto)));
+    @PostMapping
+    public MessageDto createByUserInChat(@RequestParam Long chatId, @RequestParam String token,
+                                         @RequestBody MessageCreateDto messageCreateDto) {
+        return mapper.toMessageDto(messageService.createByUserInChat(chatId, token, mapper.toMessage(messageCreateDto)));
     }
 
-    @PutMapping("/{id}/{userId}&{userUuid}/{newText}")
-    public void updateByAuthor(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid, @PathVariable String newText) {
-        messageService.updateByAuthor(id, userId, userUuid, newText);
+    @PutMapping("/{id}")
+    public void updateByAuthor(@PathVariable Long id,
+                               @RequestParam String token,
+                               @RequestBody String newText) {
+        messageService.updateByAuthor(id, token, newText);
     }
 
-    @DeleteMapping("/{id}/{userId}&{userUuid}")
-    public void deleteByAuthorOrMod(@PathVariable Long id, @PathVariable Long userId, @PathVariable UUID userUuid) {
-        messageService.deleteByAuthorOrMod(id, userId, userUuid);
+    @DeleteMapping("/{id}")
+    public void deleteByAuthorOrMod(@PathVariable Long id,
+                                    @RequestParam String token) {
+        messageService.deleteByAuthorOrMod(id, token);
     }
 }

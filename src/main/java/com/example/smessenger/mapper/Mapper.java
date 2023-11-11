@@ -12,6 +12,8 @@ import com.example.smessenger.entity.Chat;
 import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @org.mapstruct.Mapper(componentModel = "spring")
@@ -62,12 +65,17 @@ public interface Mapper {
     default Message toLastMessage(List<Message> messages) {
         return messages.get(messages.size() - 1);
     }
-    
+
     static <T> Page<T> toPage(List<T> objs, Pageable pageable) {
-        int start = (int)pageable.getOffset();
+        int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), objs.size());
         List<T> subObjs = objs.subList(start, end);
 
         return new PageImpl<>(subObjs, pageable, objs.size());
+    }
+
+    static Pair<Long, UUID> splitToken(String token) {
+        String[] split = token.split("&");
+        return new ImmutablePair<>(Long.parseLong(split[0]), UUID.fromString(split[1]));
     }
 }

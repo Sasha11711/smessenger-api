@@ -4,10 +4,13 @@ import com.example.smessenger.dto.user.UserUpdateDto;
 import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.*;
+import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -51,8 +54,8 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void update(Long id, UUID uuid, UserUpdateDto user) {
-        Users existingUser = checkUser(id, uuid);
+    public void update(String token, UserUpdateDto user) {
+        Users existingUser = checkUser(token);
         String newUsername = user.getUsername();
         Image newAvatar = user.getAvatar();
         boolean usernameChangeable = newUsername != null && !newUsername.equals(existingUser.getUsername());
@@ -64,8 +67,8 @@ public class UserService {
         }
     }
 
-    public String changePassword(Long id, UUID uuid, String login, String oldPassword, String newPassword) {
-        Users existingUser = checkUser(id, uuid);
+    public String changePassword(String token, String login, String oldPassword, String newPassword) {
+        Users existingUser = checkUser(token);
         if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), oldPassword))
             throw new BadRequestException("Incorrect login or password");
         if (!passwordRegex.matcher(newPassword).matches())
@@ -77,8 +80,8 @@ public class UserService {
         return existingUser.getId() + "&" + newUuid;
     }
 
-    public void addFriendRequest(Long id, UUID uuid, Long userId) {
-        Users existingUser = checkUser(id, uuid);
+    public void addFriendRequest(String token, Long userId) {
+        Users existingUser = checkUser(token);
         Users existingAnotherUser = checkUser(userId);
         if (existingUser == existingAnotherUser)
             throw new ConflictException("Cannot do actions with yourself");
@@ -87,29 +90,29 @@ public class UserService {
         if (existingUser.getBlockedBy().contains(existingUser))
             throw new ForbiddenException("You're blocked");
         if (existingUser.getFriendRequestedBy().contains(existingAnotherUser)) {
-            acceptFriendRequest(id, uuid, userId);
+            acceptFriendRequest(token, userId);
         } else if (!existingUser.getFriends().contains(existingAnotherUser)) {
             existingUser.getFriendRequests().add(existingAnotherUser);
         }
         userRepository.save(existingUser);
     }
 
-    public void removeFriendRequest(Long id, UUID uuid, Long userId) {
-        Users existingUser = checkUser(id, uuid);
+    public void removeFriendRequest(String token, Long userId) {
+        Users existingUser = checkUser(token);
         Users existingAnotherUser = get(userId);
         if (existingUser.getFriendRequests().remove(existingAnotherUser))
             userRepository.save(existingUser);
     }
 
-    public void declineFriendRequest(Long id, UUID uuid, Long userId) {
-        Users existingUser = checkUser(id, uuid);
+    public void declineFriendRequest(String token, Long userId) {
+        Users existingUser = checkUser(token);
         Users existingAnotherUser = get(userId);
         if (existingAnotherUser.getFriendRequests().remove(existingUser))
             userRepository.save(existingAnotherUser);
     }
 
-    public void acceptFriendRequest(Long id, UUID uuid, Long userId) {
-        Users existingUser = checkUser(id, uuid);
+    public void acceptFriendRequest(String token, Long userId) {
+        Users existingUser = checkUser(token);
         Users existingAnotherUser = get(userId);
         if (existingAnotherUser.getFriendRequests().remove(existingUser)) {
             existingUser.getFriends().add(existingAnotherUser);
@@ -119,8 +122,8 @@ public class UserService {
         }
     }
 
-    public void removeFriend(Long id, UUID uuid, Long userId) {
-        Users existingUser = checkUser(id, uuid);
+    public void removeFriend(String token, Long userId) {
+        Users existingUser = checkUser(token);
         Users existingAnotherUser = get(userId);
         if (existingUser.getFriends().remove(existingAnotherUser)) {
             existingAnotherUser.getFriends().remove(existingUser);
@@ -129,8 +132,8 @@ public class UserService {
         }
     }
 
-    public void blockUser(Long id, UUID uuid, Long userId) {
-        Users existingUser = checkUser(id, uuid);
+    public void blockUser(String token, Long userId) {
+        Users existingUser = checkUser(token);
         Users existingAnotherUser = get(userId);
         if (existingUser == existingAnotherUser)
             throw new ConflictException("Cannot do actions with yourself");
@@ -142,21 +145,21 @@ public class UserService {
         }
     }
 
-    public void unblockUser(Long id, UUID uuid, Long userId) {
-        Users existingUser = checkUser(id, uuid);
+    public void unblockUser(String token, Long userId) {
+        Users existingUser = checkUser(token);
         Users existingAnotherUser = get(userId);
         if (existingUser.getBlockedUsers().remove(existingAnotherUser))
             userRepository.save(existingUser);
     }
 
-    public void resetUuid(Long id, UUID uuid) {
-        Users existingUser = checkUser(id, uuid);
+    public void resetUuid(String token) {
+        Users existingUser = checkUser(token);
         existingUser.setUuid(UUID.randomUUID());
         userRepository.save(existingUser);
     }
 
-    public void delete(Long id, UUID uuid, String login, String password) {
-        Users existingUser = checkUser(id, uuid);
+    public void delete(String token, String login, String password) {
+        Users existingUser = checkUser(token);
         if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), password))
             throw new BadRequestException("Incorrect login or password");
         Long avatarId = existingUser.getAvatar().getId();
@@ -186,9 +189,10 @@ public class UserService {
         return existingUser;
     }
 
-    public Users checkUser(Long id, UUID uuid) throws GoneException, BadRequestException {
-        Users existingUser = checkUser(id);
-        if (!existingUser.getUuid().equals(uuid))
+    public Users checkUser(String token) throws GoneException, BadRequestException {
+        Pair<Long, UUID> splitToken = Mapper.splitToken(token);
+        Users existingUser = checkUser(splitToken.getLeft());
+        if (!existingUser.getUuid().equals(splitToken.getRight()))
             throw new BadRequestException("Invalid uuid");
         return existingUser;
     }
