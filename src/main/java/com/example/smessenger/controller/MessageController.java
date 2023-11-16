@@ -5,6 +5,7 @@ import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.MessageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -20,10 +21,10 @@ public class MessageController {
         return mapper.toMessageDto(messageService.get(id, token));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public MessageDto createByUserInChat(@RequestParam Long chatId, @RequestParam String token,
-                                         @RequestBody MessageCreateDto messageCreateDto) {
-        return mapper.toMessageDto(messageService.createByUserInChat(chatId, token, mapper.toMessage(messageCreateDto)));
+                                         @ModelAttribute MessageCreateDto messageCreateDto) {
+        return mapper.toMessageDto(messageService.createByUserInChat(chatId, token, messageCreateDto));
     }
 
     @PutMapping("/{id}")

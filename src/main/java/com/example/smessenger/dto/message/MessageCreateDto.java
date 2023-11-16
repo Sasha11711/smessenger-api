@@ -1,10 +1,10 @@
 package com.example.smessenger.dto.message;
 
-import com.example.smessenger.entity.Image;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class MessageCreateDto {
     private String text;
-    private Image embed;
+    private MultipartFile embed;
 }

@@ -1,10 +1,10 @@
 package com.example.smessenger.dto.chat;
 
-import com.example.smessenger.entity.Image;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class ChatCreateDto {
     private String title;
-    private Image image;
+    private MultipartFile image;
 }

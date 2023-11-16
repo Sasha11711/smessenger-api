@@ -38,7 +38,7 @@ public class Users {
 
     @ManyToOne
     @JoinColumn(name = "avatar_id", nullable = false)
-    private Image avatar = new Image(1L, null, null, null, null);
+    private Image avatar;
 
     @ToString.Include
     @Column(nullable = false, updatable = false)

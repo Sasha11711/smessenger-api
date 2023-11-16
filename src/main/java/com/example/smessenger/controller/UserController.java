@@ -7,6 +7,7 @@ import com.example.smessenger.dto.user.UserUpdateDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -34,26 +35,26 @@ public class UserController {
         return mapper.toUserDto(userService.checkUser(token));
     }
 
-    @GetMapping(value = "/get-token/{login}&{password}")
-    public String getToken(@PathVariable String login, @PathVariable String password) {
+    @GetMapping(value = "/get-token")
+    public String getToken(@RequestParam String login, @RequestParam String password) {
         return userService.getToken(login, password);
     }
 
     @PostMapping
-    public void create(@RequestBody UserCreateDto userInfoDto) {
-        userService.create(mapper.toUser(userInfoDto));
+    public void create(@ModelAttribute UserCreateDto userCreateDto) {
+        userService.create(mapper.toUser(userCreateDto));
     }
 
-    @PutMapping
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void update(@RequestParam String token,
                        @RequestBody UserUpdateDto userUpdateDto) {
         userService.update(token, userUpdateDto);
     }
 
     @PutMapping("/change-password")
-    public String changePassword(@RequestParam String token, @RequestParam String login, @RequestParam String oldPassword,
+    public String changePassword(@RequestParam String token, @RequestParam String login, @RequestParam String password,
                                  @RequestBody String newPassword) {
-        return userService.changePassword(token, login, oldPassword, newPassword);
+        return userService.changePassword(token, login, password, newPassword);
     }
 
     @PutMapping("/add-request/{userId}")

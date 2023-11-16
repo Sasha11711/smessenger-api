@@ -27,7 +27,7 @@ public class Chat {
 
     @ManyToOne
     @JoinColumn(name = "image_id", nullable = false)
-    private Image image = new Image(1L, null, null, null, null);
+    private Image image;
 
     @ToString.Include
     @Column(nullable = false, updatable = false)

@@ -1,7 +1,6 @@
 package com.example.smessenger.service;
 
 import com.example.smessenger.dto.user.UserUpdateDto;
-import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.*;
 import com.example.smessenger.mapper.Mapper;
@@ -11,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -51,25 +51,30 @@ public class UserService {
         if (!passwordRegex.matcher(password).matches())
             throw new BadRequestException("Invalid password format");
         user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+        user.setAvatar(imageService.get(1L));
         userRepository.save(user);
     }
 
     public void update(String token, UserUpdateDto user) {
         Users existingUser = checkUser(token);
         String newUsername = user.getUsername();
-        Image newAvatar = user.getAvatar();
+        byte[] newAvatar = Mapper.toByteArray(user.getAvatar());
         boolean usernameChangeable = newUsername != null && !newUsername.equals(existingUser.getUsername());
-        boolean avatarChangeable = newAvatar != null && newAvatar != existingUser.getAvatar();
+        boolean avatarChangeable = newAvatar != null && !Arrays.equals(newAvatar, existingUser.getAvatar().getImage());
         if (usernameChangeable || avatarChangeable) {
             if (usernameChangeable) existingUser.setUsername(newUsername);
-            if (avatarChangeable) existingUser.setAvatar(imageService.create(newAvatar));
-            userRepository.save(existingUser);
+            if (avatarChangeable) {
+                Long oldAvatarId = existingUser.getAvatar().getId();
+                existingUser.setAvatar(imageService.create(newAvatar));
+                userRepository.save(existingUser);
+                imageService.deleteIfUnused(oldAvatarId);
+            } else userRepository.save(existingUser);
         }
     }
 
-    public String changePassword(String token, String login, String oldPassword, String newPassword) {
+    public String changePassword(String token, String login, String password, String newPassword) {
         Users existingUser = checkUser(token);
-        if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), oldPassword))
+        if (!Objects.equals(existingUser.getLogin(), login) || !Objects.equals(existingUser.getPassword(), password))
             throw new BadRequestException("Incorrect login or password");
         if (!passwordRegex.matcher(newPassword).matches())
             throw new BadRequestException("Invalid password format");

@@ -2,17 +2,18 @@ package com.example.smessenger.service;
 
 import com.example.smessenger.dto.chat.ChatCreateDto;
 import com.example.smessenger.entity.Chat;
-import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
+import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static com.example.smessenger.mapper.Mapper.toPage;
@@ -46,9 +47,16 @@ public class ChatService {
         return toPage(existingChat.getMessages(), pageable);
     }
 
-    public Chat createByUser(String token, Chat chat) {
+    public Chat createByUser(String token, ChatCreateDto chatCreateDto) {
         Users existingUser = userService.checkUser(token);
-        chat.setImage(imageService.create(chat.getImage()));
+        Chat chat = new Chat();
+        chat.setTitle(chatCreateDto.getTitle());
+        byte[] image = Mapper.toByteArray(chatCreateDto.getImage());
+        if (image != null)
+            chat.setImage(imageService.create(image));
+        else {
+            chat.setImage(imageService.get(1L));
+        }
         chat.setUsers(Collections.singleton(existingUser));
         chat.setModerators(Collections.singleton(existingUser));
         chatRepository.save(chat);
@@ -60,13 +68,17 @@ public class ChatService {
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
             String newTitle = chat.getTitle();
-            Image newImage = imageService.create(chat.getImage());
+            byte[] newImage = Mapper.toByteArray(chat.getImage());
             boolean titleChangeable = newTitle != null && !newTitle.equals(existingChat.getTitle());
-            boolean imageChangeable = newImage.getImage() != null && newImage.getImage() != existingChat.getImage().getImage();
+            boolean imageChangeable = newImage != null && !Arrays.equals(newImage, existingChat.getImage().getImage());
             if (titleChangeable || imageChangeable) {
                 if (titleChangeable) existingChat.setTitle(newTitle);
-                if (imageChangeable) existingChat.setImage(newImage);
-                chatRepository.save(existingChat);
+                if (imageChangeable) {
+                    Long oldImageId = existingChat.getImage().getId();
+                    existingChat.setImage(imageService.create(newImage));
+                    chatRepository.save(existingChat);
+                    imageService.deleteIfUnused(oldImageId);
+                } else chatRepository.save(existingChat);
             }
         }
     }

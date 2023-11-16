@@ -9,6 +9,7 @@ import com.example.smessenger.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -36,16 +37,16 @@ public class ChatController {
         return chatService.getMessages(id, token, pageable).map(mapper::toMessageDto);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ChatInfoDto createByUser(@RequestParam String token,
-                                    @RequestBody ChatCreateDto chatCreateDto) {
-        return mapper.toChatInfoDto(chatService.createByUser(token, mapper.toChat(chatCreateDto)));
+                                    @ModelAttribute ChatCreateDto chatCreateDto) {
+        return mapper.toChatInfoDto(chatService.createByUser(token, chatCreateDto));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void updateByMod(@PathVariable Long id,
                             @RequestParam String token,
-                            @RequestBody ChatCreateDto chatCreateDto) {
+                            @ModelAttribute ChatCreateDto chatCreateDto) {
         chatService.updateByMod(id, token, chatCreateDto);
     }
 

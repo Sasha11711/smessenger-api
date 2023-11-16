@@ -19,17 +19,20 @@ public class ImageService {
         return imageRepository.findByImage(image);
     }
 
-    public Image create(Image image) {
-        Image exists = get(image.getImage());
+    public Image create(byte[] image) {
+        Image exists = get(image);
         if (exists != null) {
             return exists;
         }
-        imageRepository.save(image);
-        return image;
+        Image newImage = new Image();
+        newImage.setImage(image);
+        imageRepository.save(newImage);
+        return newImage;
     }
 
     public void deleteIfUnused(Long id) {
         Image image = get(id);
+        System.out.println(image.getChats().isEmpty());
         if (image.getChats().isEmpty() &&
                 image.getMessages().isEmpty() &&
                 image.getUsers().isEmpty()) {

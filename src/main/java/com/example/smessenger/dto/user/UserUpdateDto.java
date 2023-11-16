@@ -1,10 +1,10 @@
 package com.example.smessenger.dto.user;
 
-import com.example.smessenger.entity.Image;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class UserUpdateDto {
     private String username;
-    private Image avatar;
+    private MultipartFile avatar;
 }

@@ -1,9 +1,7 @@
 package com.example.smessenger.mapper;
 
-import com.example.smessenger.dto.chat.ChatCreateDto;
 import com.example.smessenger.dto.chat.ChatDto;
 import com.example.smessenger.dto.chat.ChatInfoDto;
-import com.example.smessenger.dto.message.MessageCreateDto;
 import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.dto.user.UserCreateDto;
 import com.example.smessenger.dto.user.UserDto;
@@ -12,6 +10,7 @@ import com.example.smessenger.entity.Chat;
 import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
+import com.example.smessenger.exception.BadRequestException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.mapstruct.Mapping;
@@ -20,7 +19,9 @@ import org.mapstruct.Named;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -33,15 +34,12 @@ public interface Mapper {
 
     @Mappings({
             @Mapping(target = "lastMessage", source = "messages", qualifiedByName = "toLastMessage"),
-            @Mapping(target = "moderatorsId", source = "moderators")
+            @Mapping(target = "moderatorsId", source = "moderators"),
+            @Mapping(target = "imageId", source = "image")
     })
     ChatDto toChatDto(Chat chat);
 
-    Chat toChat(ChatCreateDto chatCreateDto);
-
     MessageDto toMessageDto(Message message);
-
-    Message toMessage(MessageCreateDto messageCreateDto);
 
     UserInfoDto toUserInfoDto(Users user);
 
@@ -63,7 +61,11 @@ public interface Mapper {
 
     @Named("toLastMessage")
     default Message toLastMessage(List<Message> messages) {
-        return messages.get(messages.size() - 1);
+        int messageCount = messages.size();
+        if (messageCount > 0) {
+            return messages.get(messages.size() - 1);
+        }
+        return null;
     }
 
     static <T> Page<T> toPage(List<T> objs, Pageable pageable) {
@@ -77,5 +79,16 @@ public interface Mapper {
     static Pair<Long, UUID> splitToken(String token) {
         String[] split = token.split("&");
         return new ImmutablePair<>(Long.parseLong(split[0]), UUID.fromString(split[1]));
+    }
+
+    static byte[] toByteArray(MultipartFile file) throws BadRequestException {
+        if (file == null)
+            return null;
+        try {
+            return file.getBytes();
+        }
+        catch (IOException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 }

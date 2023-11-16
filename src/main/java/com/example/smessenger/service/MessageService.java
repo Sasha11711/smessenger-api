@@ -1,11 +1,12 @@
 package com.example.smessenger.service;
 
+import com.example.smessenger.dto.message.MessageCreateDto;
 import com.example.smessenger.entity.Chat;
-import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
+import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -29,12 +30,14 @@ public class MessageService {
         return get(id);
     }
 
-    public Message createByUserInChat(Long chatId, String token, Message message) {
+    public Message createByUserInChat(Long chatId, String token, MessageCreateDto messageCreateDto) {
         Users existingUser = userService.checkUser(token);
         Chat existingChat = chatService.get(chatId);
         if (!existingChat.getUsers().contains(existingUser))
             throw new ForbiddenException("User is not in the chat");
-        Image embed = message.getEmbed();
+        Message message = new Message();
+        message.setText(messageCreateDto.getText());
+        byte[] embed = Mapper.toByteArray(messageCreateDto.getEmbed());
         if (embed != null)
             message.setEmbed(imageService.create(embed));
         message.setChat(existingChat);
