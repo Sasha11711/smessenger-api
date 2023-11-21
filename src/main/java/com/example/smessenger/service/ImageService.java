@@ -32,7 +32,6 @@ public class ImageService {
 
     public void deleteIfUnused(Long id) {
         Image image = get(id);
-        System.out.println(image.getChats().isEmpty());
         if (image.getChats().isEmpty() &&
                 image.getMessages().isEmpty() &&
                 image.getUsers().isEmpty()) {

@@ -196,9 +196,13 @@ public class UserService {
 
     public Users checkUser(String token) throws GoneException, BadRequestException {
         Pair<Long, UUID> splitToken = Mapper.splitToken(token);
-        Users existingUser = checkUser(splitToken.getLeft());
-        if (!existingUser.getUuid().equals(splitToken.getRight()))
-            throw new BadRequestException("Invalid uuid");
-        return existingUser;
+        try {
+            Users existingUser = checkUser(splitToken.getLeft());
+            if (!existingUser.getUuid().equals(splitToken.getRight()))
+                throw new UnauthorizedException("Invalid token");
+            return existingUser;
+        } catch (NotFoundException e) {
+            throw new UnauthorizedException(e.getMessage());
+        }
     }
 }

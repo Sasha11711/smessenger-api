@@ -18,10 +18,11 @@ import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -68,12 +69,14 @@ public interface Mapper {
         return null;
     }
 
-    static <T> Page<T> toPage(List<T> objs, Pageable pageable) {
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), objs.size());
-        List<T> subObjs = objs.subList(start, end);
-
-        return new PageImpl<>(subObjs, pageable, objs.size());
+    static <T> Page<T> toPage(List<T> items, int page, int size) {
+        int pageIndex = page - 1;
+        int start = pageIndex * size;
+        if (start > items.size())
+            return new PageImpl<>(Collections.emptyList());
+        int end = Math.min(start + size, items.size());
+        List<T> subItems = items.subList(start, end);
+        return new PageImpl<>(subItems, PageRequest.of(page, size), items.size());
     }
 
     static Pair<Long, UUID> splitToken(String token) {
@@ -86,8 +89,7 @@ public interface Mapper {
             return null;
         try {
             return file.getBytes();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
     }

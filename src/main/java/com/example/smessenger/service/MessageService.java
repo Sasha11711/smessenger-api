@@ -9,6 +9,8 @@ import com.example.smessenger.exception.NotFoundException;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,11 @@ public class MessageService {
     public Message get(Long id, String token) {
         userService.checkUser(token);
         return get(id);
+    }
+
+    public Page<Message> getAll(Long chatId, String token, int page, int size) {
+        userService.checkUser(token);
+        return messageRepository.findMessagesByChat_Id(chatId, PageRequest.of(page, size));
     }
 
     public Message createByUserInChat(Long chatId, String token, MessageCreateDto messageCreateDto) {

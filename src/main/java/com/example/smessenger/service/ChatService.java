@@ -2,21 +2,16 @@ package com.example.smessenger.service;
 
 import com.example.smessenger.dto.chat.ChatCreateDto;
 import com.example.smessenger.entity.Chat;
-import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Collections;
-
-import static com.example.smessenger.mapper.Mapper.toPage;
 
 @RequiredArgsConstructor
 @Service
@@ -36,15 +31,6 @@ public class ChatService {
             throw new ForbiddenException("User is not in the chat");
         }
         return existingChat;
-    }
-
-    public Page<Message> getMessages(Long id, String token, Pageable pageable) {
-        Users existingUser = userService.checkUser(token);
-        Chat existingChat = get(id);
-        if (!existingChat.getUsers().contains(existingUser)) {
-            throw new ForbiddenException("User is not in the chat");
-        }
-        return toPage(existingChat.getMessages(), pageable);
     }
 
     public Chat createByUser(String token, ChatCreateDto chatCreateDto) {

@@ -3,12 +3,9 @@ package com.example.smessenger.controller;
 import com.example.smessenger.dto.chat.ChatCreateDto;
 import com.example.smessenger.dto.chat.ChatDto;
 import com.example.smessenger.dto.chat.ChatInfoDto;
-import com.example.smessenger.dto.message.MessageDto;
 import com.example.smessenger.mapper.Mapper;
 import com.example.smessenger.service.ChatService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,13 +25,6 @@ public class ChatController {
     public ChatDto getByUser(@PathVariable Long id,
                              @RequestParam String token) {
         return mapper.toChatDto(chatService.getByUser(id, token));
-    }
-
-    @GetMapping(value = "/{id}/messages")
-    public Page<MessageDto> getMessages(@PathVariable Long id,
-                                        @RequestParam String token,
-                                        @RequestParam(defaultValue = "0") Pageable pageable) {
-        return chatService.getMessages(id, token, pageable).map(mapper::toMessageDto);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

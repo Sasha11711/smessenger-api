@@ -41,13 +41,13 @@ public class UserController {
     }
 
     @PostMapping
-    public void create(@ModelAttribute UserCreateDto userCreateDto) {
+    public void create(@RequestBody UserCreateDto userCreateDto) {
         userService.create(mapper.toUser(userCreateDto));
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void update(@RequestParam String token,
-                       @RequestBody UserUpdateDto userUpdateDto) {
+                       @ModelAttribute UserUpdateDto userUpdateDto) {
         userService.update(token, userUpdateDto);
     }
 
