@@ -4,6 +4,7 @@ import com.example.smessenger.dto.message.MessageCreateDto;
 import com.example.smessenger.entity.Chat;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
+import com.example.smessenger.exception.BadRequestException;
 import com.example.smessenger.exception.ForbiddenException;
 import com.example.smessenger.exception.NotFoundException;
 import com.example.smessenger.mapper.Mapper;
@@ -11,7 +12,6 @@ import com.example.smessenger.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -21,7 +21,6 @@ public class MessageService {
     private final ChatService chatService;
     private final UserService userService;
     private final ImageService imageService;
-    private final SimpMessagingTemplate simpMessagingService;
 
     public Message get(Long id) {
         return messageRepository.findById(id).orElseThrow(() -> new NotFoundException("Entity not found"));
@@ -50,30 +49,29 @@ public class MessageService {
         message.setChat(existingChat);
         message.setAuthor(existingUser);
         messageRepository.save(message);
-        simpMessagingService.convertAndSend("/chat/" + chatId + "/messageSent", message);
         return message;
     }
 
-    public void updateByAuthor(Long id, String token, String newText) {
+    public Message updateByAuthor(Long id, String token, String newText) {
         Users existingUser = userService.checkUser(token);
         Message existingMessage = get(id);
         if (existingMessage.getAuthor() != existingUser)
             throw new ForbiddenException("User isn't author");
-        if (newText != null && !newText.equals(existingMessage.getText())) {
-            existingMessage.setIsEdited(true);
-            existingMessage.setText(newText);
-            messageRepository.save(existingMessage);
-            simpMessagingService.convertAndSend("/chat/" + existingMessage.getChat().getId() + "/messageEdited", existingMessage);
-        }
+        if (newText == null || newText.equals(existingMessage.getText()))
+            throw new BadRequestException("Message is empty or the same");
+        existingMessage.setIsEdited(true);
+        existingMessage.setText(newText);
+        messageRepository.save(existingMessage);
+        return existingMessage;
     }
 
-    public void deleteByAuthorOrMod(Long id, String token) {
+    public Message deleteByAuthorOrMod(Long id, String token) {
         Users existingUser = userService.checkUser(token);
         Message existingMessage = get(id);
         if (existingMessage.getAuthor() == existingUser || existingMessage.getChat().getModerators().contains(existingUser)) {
             messageRepository.deleteById(id);
             imageService.deleteIfUnused(existingMessage.getEmbed().getId());
-            simpMessagingService.convertAndSend("/chat/" + existingMessage.getChat().getId() + "/messageDeleted", existingMessage);
+            return existingMessage;
         } else {
             throw new ForbiddenException("User isn't a moderator or an author");
         }
