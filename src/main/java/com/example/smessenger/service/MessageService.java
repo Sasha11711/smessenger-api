@@ -2,6 +2,7 @@ package com.example.smessenger.service;
 
 import com.example.smessenger.dto.message.MessageCreateDto;
 import com.example.smessenger.entity.Chat;
+import com.example.smessenger.entity.Image;
 import com.example.smessenger.entity.Message;
 import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.BadRequestException;
@@ -33,7 +34,7 @@ public class MessageService {
 
     public Page<Message> getAll(Long chatId, String token, int page, int size) {
         userService.checkUser(token);
-        return messageRepository.findMessagesByChat_Id(chatId, PageRequest.of(page, size));
+        return messageRepository.findMessagesByChat_IdOrderByIdDesc(chatId, PageRequest.of(page, size));
     }
 
     public Message createByUserInChat(Long chatId, String token, MessageCreateDto messageCreateDto) {
@@ -70,7 +71,9 @@ public class MessageService {
         Message existingMessage = get(id);
         if (existingMessage.getAuthor() == existingUser || existingMessage.getChat().getModerators().contains(existingUser)) {
             messageRepository.deleteById(id);
-            imageService.deleteIfUnused(existingMessage.getEmbed().getId());
+            Image embed = existingMessage.getEmbed();
+            if (embed != null)
+                imageService.deleteIfUnused(embed.getId());
             return existingMessage;
         } else {
             throw new ForbiddenException("User isn't a moderator or an author");

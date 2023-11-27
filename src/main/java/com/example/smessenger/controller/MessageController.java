@@ -12,14 +12,12 @@ import com.example.smessenger.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/message")
 public class MessageController {
-    private final SimpMessagingTemplate simpMessagingService;
     private final MessageService messageService;
     private final ChatService chatService;
     private final UserService userService;
@@ -44,23 +42,19 @@ public class MessageController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public MessageDto createByUserInChat(@RequestParam Long chatId, @RequestParam String token,
                                          @ModelAttribute MessageCreateDto messageCreateDto) {
-        MessageDto messageDto = mapper.toMessageDto(messageService.createByUserInChat(chatId, token, messageCreateDto));
-        simpMessagingService.convertAndSend("/chat/" + chatId + "/messageSent", messageDto);
-        return messageDto;
+        return mapper.toMessageDto(messageService.createByUserInChat(chatId, token, messageCreateDto));
     }
 
     @PutMapping("/{id}")
-    public void updateByAuthor(@PathVariable Long id,
+    public MessageDto updateByAuthor(@PathVariable Long id,
                                @RequestParam String token,
                                @RequestBody String newText) {
-        MessageDto messageDto = mapper.toMessageDto(messageService.updateByAuthor(id, token, newText));
-        simpMessagingService.convertAndSend("/chat/" + messageDto.getChat().getId() + "/messageEdited", messageDto);
+        return mapper.toMessageDto(messageService.updateByAuthor(id, token, newText));
     }
 
     @DeleteMapping("/{id}")
     public void deleteByAuthorOrMod(@PathVariable Long id,
                                     @RequestParam String token) {
-        MessageDto messageDto = mapper.toMessageDto(messageService.deleteByAuthorOrMod(id, token));
-        simpMessagingService.convertAndSend("/chat/" + messageDto.getChat().getId() + "/messageDeleted", messageDto.getId());
+        mapper.toMessageDto(messageService.deleteByAuthorOrMod(id, token));
     }
 }

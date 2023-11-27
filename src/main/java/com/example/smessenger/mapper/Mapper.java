@@ -16,16 +16,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @org.mapstruct.Mapper(componentModel = "spring")
@@ -40,6 +34,10 @@ public interface Mapper {
     })
     ChatDto toChatDto(Chat chat);
 
+    @Mappings({
+            @Mapping(target = "author.avatarId", source = "author.avatar"),
+            @Mapping(target = "embedId", source = "embed")
+    })
     MessageDto toMessageDto(Message message);
 
     UserInfoDto toUserInfoDto(Users user);
@@ -49,6 +47,8 @@ public interface Mapper {
     Users toUser(UserCreateDto userCreateDto);
 
     default Long imageToLong(Image image) {
+        if (image == null)
+            return null;
         return image.getId();
     }
 
@@ -62,21 +62,12 @@ public interface Mapper {
 
     @Named("toLastMessage")
     default Message toLastMessage(List<Message> messages) {
+        messages.sort(Comparator.comparing(Message::getId));
         int messageCount = messages.size();
         if (messageCount > 0) {
             return messages.get(messages.size() - 1);
         }
         return null;
-    }
-
-    static <T> Page<T> toPage(List<T> items, int page, int size) {
-        int pageIndex = page - 1;
-        int start = pageIndex * size;
-        if (start > items.size())
-            return new PageImpl<>(Collections.emptyList());
-        int end = Math.min(start + size, items.size());
-        List<T> subItems = items.subList(start, end);
-        return new PageImpl<>(subItems, PageRequest.of(page, size), items.size());
     }
 
     static Pair<Long, UUID> splitToken(String token) {
