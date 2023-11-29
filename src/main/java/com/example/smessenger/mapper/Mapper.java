@@ -40,8 +40,10 @@ public interface Mapper {
     })
     MessageDto toMessageDto(Message message);
 
+    @Mapping(target = "avatarId", source = "avatar")
     UserInfoDto toUserInfoDto(Users user);
 
+    @Mapping(target = "avatarId", source = "avatar")
     UserDto toUserDto(Users user);
 
     Users toUser(UserCreateDto userCreateDto);
