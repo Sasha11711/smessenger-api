@@ -13,9 +13,11 @@ import com.example.smessenger.entity.Users;
 import com.example.smessenger.exception.BadRequestException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -46,6 +48,7 @@ public interface Mapper {
     @Mapping(target = "avatarId", source = "avatar")
     UserDto toUserDto(Users user);
 
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     Users toUser(UserCreateDto userCreateDto);
 
     default Long imageToLong(Image image) {
