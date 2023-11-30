@@ -20,8 +20,8 @@ public class UserController {
     private final UserService userService;
     private final Mapper mapper;
 
-    @GetMapping(value = "/find-by-username/{username}")
-    public Set<UserInfoDto> getAllByUsername(@PathVariable(required = false) String username) {
+    @GetMapping(value = "/find")
+    public Set<UserInfoDto> getAllByUsername(@RequestParam String username) {
         return userService.getAllByUsername(username).stream().map(mapper::toUserInfoDto).collect(Collectors.toSet());
     }
 

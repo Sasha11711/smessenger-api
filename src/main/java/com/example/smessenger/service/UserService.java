@@ -94,11 +94,10 @@ public class UserService {
             throw new ForbiddenException("User is blocked");
         if (existingUser.getBlockedBy().contains(existingUser))
             throw new ForbiddenException("You're blocked");
-        if (existingUser.getFriendRequestedBy().contains(existingAnotherUser)) {
+        if (existingUser.getFriendRequestedBy().contains(existingAnotherUser))
             acceptFriendRequest(token, userId);
-        } else if (!existingUser.getFriends().contains(existingAnotherUser)) {
+        else if (!existingUser.getFriends().contains(existingAnotherUser))
             existingUser.getFriendRequests().add(existingAnotherUser);
-        }
         userRepository.save(existingUser);
     }
 
@@ -124,7 +123,7 @@ public class UserService {
             existingAnotherUser.getFriends().add(existingUser);
             userRepository.save(existingUser);
             userRepository.save(existingAnotherUser);
-        }
+        } else throw new ForbiddenException("No friend request");
     }
 
     public void removeFriend(String token, Long userId) {
