@@ -38,11 +38,8 @@ public class ChatService {
         Chat chat = new Chat();
         chat.setTitle(chatCreateDto.getTitle());
         byte[] image = Mapper.toByteArray(chatCreateDto.getImage());
-        if (image != null)
-            chat.setImage(imageService.create(image));
-        else {
-            chat.setImage(imageService.get(1L));
-        }
+        if (image != null) chat.setImage(imageService.create(image));
+        else chat.setImage(imageService.get(1L));
         chat.setUsers(Collections.singleton(existingUser));
         chat.setModerators(Collections.singleton(existingUser));
         chatRepository.save(chat);
@@ -75,22 +72,16 @@ public class ChatService {
         Chat existingChat = getByUser(id, token);
         if (existingChat.getBannedUsers().contains(existingUser))
             throw new ForbiddenException("User is banned in the chat");
-        if (!existingFriend.getFriends().contains(existingUser))
-            throw new ForbiddenException("User is not friend");
-        if (existingChat.getUsers().add(existingUser)) {
-            chatRepository.save(existingChat);
-        }
+        if (!existingFriend.getFriends().contains(existingUser)) throw new ForbiddenException("User is not friend");
+        if (existingChat.getUsers().add(existingUser)) chatRepository.save(existingChat);
     }
 
     public void leaveUser(Long id, String token) {
         Users existingUser = userService.checkUser(token);
         Chat existingChat = get(id);
         if (removeUser(existingChat, existingUser)) {
-            if (existingChat.getUsers().isEmpty()) {
-                chatRepository.deleteById(id);
-            } else {
-                chatRepository.save(existingChat);
-            }
+            if (existingChat.getUsers().isEmpty()) chatRepository.deleteById(id);
+            else chatRepository.save(existingChat);
         }
     }
 
@@ -99,10 +90,8 @@ public class ChatService {
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
-            if (removeUser(existingChat, existingUser)) {
-                chatRepository.save(existingChat);
-            }
-        }
+            if (removeUser(existingChat, existingUser)) chatRepository.save(existingChat);
+        } else throw new ForbiddenException("User is not moderator");
     }
 
     public void banUserByMod(Long id, Long userId, String token) {
@@ -114,7 +103,7 @@ public class ChatService {
                 removeUser(existingChat, existingUser);
                 chatRepository.save(existingChat);
             }
-        }
+        } else throw new ForbiddenException("User is not moderator");
     }
 
     public void unbanUserByMod(Long id, Long userId, String token) {
@@ -122,10 +111,8 @@ public class ChatService {
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
-            if (existingChat.getBannedUsers().remove(existingUser)) {
-                chatRepository.save(existingChat);
-            }
-        }
+            if (existingChat.getBannedUsers().remove(existingUser)) chatRepository.save(existingChat);
+        } else throw new ForbiddenException("User is not moderator");
     }
 
     public void setModeratorByMod(Long id, Long userId, String token) {
@@ -133,10 +120,8 @@ public class ChatService {
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod) && existingChat.getUsers().contains(existingUser)) {
-            if (existingChat.getModerators().add(existingUser)) {
-                chatRepository.save(existingChat);
-            }
-        }
+            if (existingChat.getModerators().add(existingUser)) chatRepository.save(existingChat);
+        } else throw new ForbiddenException("User is not moderator");
     }
 
     public void unsetModeratorByMod(Long id, Long userId, String token) {
@@ -144,10 +129,8 @@ public class ChatService {
         Users existingUser = userService.get(userId);
         Chat existingChat = get(id);
         if (existingChat.getModerators().contains(mod)) {
-            if (existingChat.getModerators().remove(existingUser)) {
-                chatRepository.save(existingChat);
-            }
-        }
+            if (existingChat.getModerators().remove(existingUser)) chatRepository.save(existingChat);
+        } else throw new ForbiddenException("User is not moderator");
     }
 
     public void deleteByMod(Long id, String token) {
@@ -156,7 +139,7 @@ public class ChatService {
         if (existingChat.getModerators().contains(mod)) {
             chatRepository.deleteById(id);
             imageService.deleteIfUnused(existingChat.getImage().getId());
-        }
+        } else throw new ForbiddenException("User is not moderator");
     }
 
     private boolean removeUser(Chat chat, Users user) {
